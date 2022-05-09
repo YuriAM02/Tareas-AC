@@ -4,559 +4,111 @@
 using Markdown
 using InteractiveUtils
 
-# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
-macro bind(def, element)
-    quote
-        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
-        local el = $(esc(element))
-        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
-        el
-    end
-end
+# ╔═╡ ab3ddc10-ccce-11ec-2bac-0975bbb93a6d
+using Plots, Distributions, PlutoUI
 
-# ╔═╡ 33f8289b-3e80-48a1-8a2c-ef6d2d2f107e
-using Plots, PlutoUI
+# ╔═╡ 0e91569d-c5c7-4b32-af84-1d9a1d865768
+md"### Ejercicio 3"
 
-# ╔═╡ 8302701b-02ac-4d35-b7de-5dec8fe701fb
-using LaTeXStrings
+# ╔═╡ d28a7306-0b84-4436-9dde-e23fc7927cbe
+md"##### Escribe un algoritmo que estime el valor de π y que te permita visualizar algo similar al gráfico de la Figura 2, asegúrate de incluir el conteo del número de puntos rojos, número de puntos totales, y la respectiva estimación de π."
 
-# ╔═╡ c3db98d4-84a3-11ec-17c2-7510b678ee8a
-md"# Graficación de funciones y animaciones con _Plots_"
-
-# ╔═╡ b3f850d8-60d4-4798-9beb-d42a9cdac9ae
-md"## Graficación de funciones
-
-Las computadoras grafican funciones de la misma manera en que tú lo haces en papel: forman un _arreglo_ con algunos valores de la variable independiente junto a sus respectivas imágenes bajo la función (a este proceso, como quizás recuerdes, se le llama _tabulación_), y luego marcan esos puntos sobre un plano cartesiano o espacio euclideano, dependiendo del tipo de función que se trate. La principal diferencia entre tú y ellas es la apantallante **velocidad** con la que ellas pueden hacerlo, por lo que a menudo resulta conveniente asignarles esa tarea ;)
-
-"
-
-# ╔═╡ 8c5b9695-3625-4105-8a4f-9358e208115c
-md" ### Gráficas bidimensionales
-
-#### Las funciones `plot` y `scatter`
-
-¡Empecemos a graficar! La principales funciones para graficar de la biblioteca `Plots` son `plot` -para funciones continuas- y `scatter` -para conjuntos discretos de datos. Empezaremos graficando con el comando `plot(func,arr)`, donde `func` es el **nombre** de la función que queremos graficar y `arr` es el arreglo con el que queremos que tabule. Por ejemplo, grafiquemos la función `sin` de `0` a `2π`:
-
-"
-
-# ╔═╡ 67c22c14-24a6-4080-803b-fba2be7d0fa4
-plot(sin,0:2π) # Grafica "sin" en el rango 0:2π
-
-# ╔═╡ 22a9aee4-4c6d-47d3-8cca-e41e542a84ed
-md"""
-
-¡Se ve horrible! ¡¿Qué sucedió?! Observemos más de cerca lo que pusimos:
-* `sin` es la implementación de la función $\sin(x)$ en Julia, así que no hay problema ahí;
-* `0:2π` es un arreglo de `0` a `2π`... _¡con "pasos" de longitud uno!_
-
-Por lo tanto, al correr la celda anterior en realidad sólo hicimos que Julia tabulara los valores de `sin` en los enteros entre `0` y `2π`. Nota que la función `plot` luego _unió los puntos tabulados con líneas rectas_; para ver sólo los puntos tabulados, podemos utilizar la función `scatter` con la misma sintáxis `scatter(func,arr)`:
-
-"""
-
-# ╔═╡ 9bfbf61b-66b5-42d3-878b-fb02dd6d41ee
-scatter(sin,0:2π) # Tabula "sin" en el rango 0:2π
-
-# ╔═╡ e16ca2f5-4af7-4d16-b76e-4f124e1ddbbf
-md"""
-
-Lo que hacen ambas funciones es
-* tomar el arreglo de puntos de la variable independiente dado y
-* obtener un arreglo de imágenes aplicando la función a todos los puntos del primer arreglo (igual a `func.(arr)`);
-
-en lo que difieren es que
-* `scatter` _grafica los pares ordenados_ obtenidos de la tabulación _con puntos_, mientras que
-* `plots` _une los pares ordenados_ obtenidos de la tabulación _con líneas rectas_.
-
-Para mejorar la gráfica que hicimos con `plot`, podemos meter un "tamaño de paso" más pequeño en el arreglo que le alimentamos a la función `plot`: """
-
-# ╔═╡ 98c6c916-cdfa-4bc1-baad-8888aace5c98
-plot(sin,0:0.05:2π) # ¡Mucho mejor! :D
-
-# ╔═╡ c6a475fd-bef2-4c09-a03b-211f6676d215
-md"
-
-Dado que evaluar una infinidad de valores le tomaría a una computadora una infinidad de tiempo, las tabulaciones que realizan al graficar deben ser finitas. Por ende, cuando graficamos, por ejemplo, una función de variable real con `plots`, la gráfica que obtenemos es en realidad la gráfica de una _aproximación discreta_ de la función en cuestión, unida por líneas rectas.
-
-Sin embargo, podemos controlar el _nivel de detalle_ de nuestra gráfica controlando _el número de puntos en el arreglo de entrada_. Una forma de hacer esto es:
-* definir los extremos del dominio de nuestra gráfica,
-* crear un arreglo de intervalos uniformes de longitud `l` que cubran todo el dominio de nuestra gráfica, y
-* modificar el parámetro `l` a nuestra conveniencia.
-
-"
-
-# ╔═╡ 7a1e75c3-d56b-411e-a82c-f4b53302ac23
-md"  "
-
-# ╔═╡ d2472d6a-7072-49ae-ba55-207db17be3ca
+# ╔═╡ adfee34c-3403-4192-975f-3355787da9e2
 begin
-    l = 2          # ¡Cambia el valor de l y corre la celda,
-    plot(sin,0:l:2π) # y observa qué sucede con la gráfica!
-end
-
-# ╔═╡ 4d136dae-c66d-4c9e-a267-12b2fa9fd596
-md""" Con un poquito de 'magia' de Pluto, podemos hacer que el parámetro de longitud sea _interactivo_ (también existe una manera de hacer esto en Jupyter). Nota que cambiaremos el nombre del parámetro a `l1` para no generar conflicto con la variable `l` definida anteriormente pues, en Pluto, cada vez que corres una celda, Pluto después vuelve a correr todas las demás celdas para "actualizarlas". """
-
-# ╔═╡ af69d454-96fc-4e92-af71-1251cf99ae38
-@bind l1 Slider(0.05:0.05:2, default=0.5)
-
-# ╔═╡ cdd16f8e-e945-4d5f-a71d-6896f9146512
-l1
-
-# ╔═╡ 576a42f0-bd11-4480-9e97-2f9098312a25
-plot(sin,0:l1:2π)
-
-# ╔═╡ 35d05477-a09e-4077-8513-2ac7dba4def1
-scatter(sin,0:l1:2π)
-
-# ╔═╡ fe4198bf-345a-46e5-bfeb-15619bd76f3a
-md""" #### Las funciones "modificadoras" `plot!` y `scatter!`
-
-El ejemplo anterior se varía mejor si pudiéramos encimar ambas gráficas. Para esto existen las funciones `plot!` y `scatter!` que, a diferencia de `plot` y `scatter`, _no borran las gráficas anteriores_ sino que _dibujan encima de ellas_.
-
-"""
-
-# ╔═╡ c6c40996-bb5f-4c4b-848b-821c79660042
-@bind l2 Slider(0.05:0.05:2, default=0.5)
-
-# ╔═╡ d6a012c7-47b6-4374-8522-aa8e6efbe84f
-l2
-
-# ╔═╡ 4d68a04e-6502-4478-a9c2-8a81bcc2b282
-begin
-    plot(sin,0:l2:2π)     # Haz una gráfica tipo 'plot' y luego
-    scatter!(sin,0:l2:2π) # haz una gráfica tipo 'scatter' encima
-end
-
-# ╔═╡ d8875d6b-7a53-43ad-87b4-5088e0fc9eac
-md" Noten que el código anterior esencialmente da el mismo resultado que"
-
-# ╔═╡ 0dd653e6-323f-450d-9097-ba4c0a304aa3
-begin
-    scatter(sin,0:l2:2π) # Haz una gráfica tipo 'scatter' y luego
-	plot!(sin,0:l2:2π)   # haz una gráfica tipo 'plot' encima
-end
-
-# ╔═╡ 809327b3-0353-4519-a586-93403d121169
-md""" #### Atributos de figuras
-
-La única diferencia entre las dos figuras anteriores es el color de cada gráfica y, por consecuencia, la leyenda. Este tipo de "detalles" se conocen como los [_atributos_](https://docs.juliaplots.org/latest/tutorial/#Plot-Attributes) de una figura, y pueden ser configurados dentro de los argumentos de estas funciones. Como ejemplo, la siguiente celda tiene una figura con los siguientes atributos configurados:
-* `title` - el título de la figura;
-* `xlabel` - la etiqueta del eje horizontal;
-* `ylabel` - la etiqueta del eje vertical;
-* `color` - el color de la gráfica en cuestión;
-* `label` - el nombre de la gráfica en cuestión (nota que aparece dos veces);
-* `marker` - la forma del símbolo utilizado para marcar la gráfica.
-
-"""
-
-# ╔═╡ d0ec9526-1bf9-4e38-be43-9aeedc56e97e
-begin
-	plot(sin,0:0.25:2π, title = "plot y scatter", xlabel = "x", ylabel = "sin(x)", color = "darkorange", label = "plot")
-    scatter!(sin,0:0.25:2π, color = "green", label = "scatter", marker = :diamond)
-end
-
-# ╔═╡ f08d2863-8e08-4df1-a3e9-5914dc8f1600
-md"De hecho, agregarle un atributo `marker = true` a una gráfica tipo `plot` nos mostrará los puntos tabulados por ésta:"
-
-# ╔═╡ fc94b6e8-cae9-46bc-9ac4-9cee5e86c8ee
-begin
-	plot(sin,0:0.25:2π, title = "plot y scatter", xlabel = "x", ylabel = "sin(x)", color = "darkorange", label = "plot", marker = true)
-end
-
-# ╔═╡ 77a60b5d-ad7f-4c44-a68d-694417619668
-md"por lo que no es necesario llamar dos funciones cuando querramos hacer esto. Para quitar la leyenda, podemos agregar el atributo `legend = false` (_¡Inténtalo!_)."
-
-# ╔═╡ 8b8aff3c-3d88-4022-bc86-b75ebefde2a3
-md""" **Ejercicio** Define un parámetro interactivo `d` que controle el nivel de detalle de una gráfica tipo `plot` de las funciones `sin` y `cos` en el intervalo $[-\pi,\pi]$, con el título "Funciones trigonométricas", donde cada función se grafique con un color diferente y la leyenda indique el nombre de cada función.
-
-"""
-
-# ╔═╡ 6adc3398-c314-4760-927e-02cc67861d0a
-@bind d Slider(0.01:0.04:2, default=0.5)
-
-# ╔═╡ 32387b91-9337-40af-a740-158a67552cd5
-begin
-	plot(sin,-π:d:π, title = "Funciones trigonométricas", xlabel = "x", ylabel = "y", color = "turquoise", label = "Sin(x)")
-	plot!(cos,-π:d:π, color = "lightpink3", label = "Cos(x)")
-end
-
-# ╔═╡ acfe0334-c7aa-471f-b39e-8276e2e3dd42
-md"""#### El paquete `LaTeXStrings`
-
-Podemos usar LaTeX para escribir texto dentro de una gráfica creada con Plots, pero tiene una sintáxis complicada. Por ejemplo, si quisiéramos que la etiqueta del eje vertical de la gráfica anterior estuviera escrita como $\sin(x)$, tendríamos que reemplazar el String `"sin(x)"` por (¡inténtalo!)
-
-`"\$\\sin(x)\$"`.
-
-Afortunadamente, el paquete [LaTeXStrings](https://github.com/stevengj/LaTeXStrings.jl) facilita este proceso. Primero debemos instalarlo y cargarlo, lo cual, en Pluto, se hace automáticamente sólo con la siguiente línea:
-
-"""
-
-# ╔═╡ 02f9778e-21c8-42db-bed6-95a20d592f22
-md"""Luego, podemos escribir el String anterior simplemente como (¡inténtalo!)
-
-`L"\sin(x)"` 
-
-Es decir, si escribimos la letra `L` antes del inicio del String y el paquete LaTeXStrings está cargado, Julia interpretará el contenido del String utilizando LaTeX."""
-
-# ╔═╡ 1907f78f-e429-4a77-a90e-c9ebb94d6385
-md"""
-
-#### Campos vectoriales con `quiver`
-
-La función `quiver` nos permite graficar un conjunto de flechas en una gráfica bidimensional. La sintáxis usual es
-
-`quiver(x, y, quiver=(v1,v2))`
-
-donde `x` es un arreglo de puntos en el eje horizontal, `y` es un arreglo de puntos en el eje vertical, y `v1` y `v2` son arreglos con las coordenadas horizontales y verticales de las flechas, respectivamente. Nota que, dado que todos los arreglos anteriores son numéricos, entonces son vectores -en particular, vectores renglón.
-
-Al ejecutar este comando:
-1. Julia creará una figura de una gráfica bidimensional.
-1. Para cada entrada `i` de los arreglos, Julia graficará una flecha con coordenadas `[v1[i], v2[i]]` con respecto a el punto con coordenadas `[x[i], y[i]]`.
-1. Para cualquiera de los arreglos `x, y, v1, v2` que tenga menos entradas que los demás, Julia ciclará sobre los elementos de ese arreglo (es decir, empezará desde el principio) hasta haber utilizado todas las entradas del arreglo más grande de los cuatro.
-
-Por ejemplo:
-
-"""
-
-# ╔═╡ 18368069-bf83-48e9-a6df-a2b5e6181277
-quiver([1,1.5,3], [3,2,1],quiver=([-0.5,1,-1],[-1,1,0.5]))
-
-#= Julia crea una figura bidimensional,
-
-   grafica una flecha con coordenadas [-0.5,-1] 
-   partiendo del punto [1,3],
-
-   grafica una flecha con coordenadas [1,1] con 
-   respecto al punto [1.5,2] y
-
-   grafica una flecha con coordenadas [-1,0.5] tomando
-   como origen al punto [1,3].
-=#
-
-# ╔═╡ ec3dfa07-89c8-48a3-adaf-021c311d2c0d
-md"""
-
-Si alguno de los primeros dos argumentos de la función `quiver` es un vector renglón y el otro es un vector columna, la función `quiver` automáticamente hará una malla de puntos con el producto cartesiano de ambos arreglos. Esto es útil para, por ejemplo, graficar campos vectoriales. Primero, definimos una función de $\mathbb{R}^2$ en $\mathbb{R}^2$
-
-"""
-
-# ╔═╡ 73d1cb8f-4fc5-4a11-885d-9bc97ecd73d9
-g(x,y) = [3x^2 - 3; 2y] / 50
-
-# ╔═╡ 324cf67f-7cf1-4613-b072-aff38958612f
-md"""
-
-y, después, ejecutamos la función `quiver` _reemplazando el tercer argumento por_ `quiver=g` _en vez de_ `quiver=(v1,v2)`
-
-"""
-
-# ╔═╡ 7c580a14-b5ec-4bb1-960b-fbce583a9b62
-quiver((-2:0.2:2)', (-2:0.2:2) , quiver=g, color=:green)
-
-# ╔═╡ 8eac3ff8-f71a-41b2-a3b2-5d7965270cdf
-md"donde la apóstrofe `'` fue utilizada para transponer la matriz `(-2:0.2:2)`, pues un vector renglón es equivalente a una matriz de un renglón."
-
-# ╔═╡ 3910bcbb-0e94-4c70-93c4-106a5fd4006a
-md""" #### Conjuntos de nivel con `contour`
-
-Consideremos la siguiente función de $\mathbb{R}^2$ en $\mathbb{R}$:
-
-"""
-
-# ╔═╡ d6d981f5-155f-4fa9-8985-ef9a1aa8e28c
-h(x,y) = cos(x) + sin(y)
-
-# ╔═╡ cc3f06b5-68b4-40c6-85ce-cb79a7f3a9df
-md"""
-
-Claramente, no podemos obtener una gráfica bidimensional completa de esta función, pues requerimos tres dimensiones...
-
-...¿o sí? En las gráficas que hemos visto hasta el momento, tenemos dos dimensiones _espaciales_, pero les podemos agregar una dimensión de _color_ y obtener una representación (al menos parcial) de nuestra función de $\mathbb{R}^2$ en $\mathbb{R}$. Esto se logra con la función `contour`. La sintáxis usual es
-
-`contour(x,y,h)`
-
-donde `x` es un arreglo que define el rango del eje horizontal, `y` es un arreglo que define el rango del eje vertical y `h` es una función que toma dos argumentos y devuelve un número.
-
-Por ejemplo:
-
-"""
-
-# ╔═╡ 7c8f914f-ad47-4487-8434-f02f2ce6d9e6
-begin
-    R = 0:0.05:2π # Un rango arbitrario para los ejemplos
-    contour(R,R,h)
-end
-
-# ╔═╡ 28bff1c1-4fe1-41ce-92fa-09277a48762b
-md"Para tener una representación más completa de la función, podemos usar el atributo `fill` y asignarle el valor `true` o, equivalentemente, usar la función `contourf`:"
-
-# ╔═╡ 8af3a0a7-df3b-4204-a806-9c330e636d84
-contourf(R,R,h)
-# Esto es equivalente a contourf(0:0.05:2π,0:0.05:2π,h)
-
-# ╔═╡ db29912b-936a-4770-9f3b-fcd57a1ffd3a
-md"""### Gráficas tridimensionales
-
-A continuación, veremos varias formas diferentes de hacer gráficas de tres dimensiones espaciales.
-
-"""
-
-# ╔═╡ cd549e6e-23f6-4591-a21e-bcc3936e4b0e
-md"""#### Puntos en tres dimensiones con `scatter`
-
-Supongamos que `x`, `y` y `z` son arreglos de números y ejecutamos la función `scatter` con estos _tres_ argumentos:
-
-`scatter(x,y,z)`
-
-Al ejecutar este comando:
-1. Julia creará una figura de una gráfica tridimensional. 
-1. Para cada entrada `i` de los arreglos, Julia graficará un punto en la coordenada `[x[i], y[i], z[i]]`.
-1. Para cualquiera de los arreglos `x`, `y`, `z` que tenga menos entradas que los demás, Julia ciclará sobre los elementos de ese arreglo hasta haber utilizado todas las entradas del arreglo más grande de los tres.
-
-Por ejemplo:
-
-"""
-
-# ╔═╡ 690f92de-4beb-452b-be8e-9469efd06632
-scatter(0:10,0:10,0:10)
-
-# ╔═╡ 2caaaf8d-21f2-4cb8-9c06-b84e36b7e28c
-md"En particular, el arreglo `z` se puede obtener aplicando una función de dos variables a los arreglos `x` y `y`.
-
-Por ejemplo, utilizando la función `h` definida anteriormente y la sintáxis
-
-`h.(A,B)`
-
-para evaluarla en los puntos del arreglo `[ [A[1],B[1]], [A[2],B[2]], ... ]`, tenemos:"
-
-# ╔═╡ 3497133e-f009-47ba-bb70-c3c6d0b8bf7c
-scatter(R,R,h.(R,R))
-
-# ╔═╡ 162a90d2-eda7-4a3a-b433-8c323bcf1334
-md"""
-
-#### Curvas en tres dimensiones con `plot`
-
-Análogamente al ejemplo en gráficas de dos dimensiones, si queremos unir puntos por líneas rectas, podemos reemplazar la función `scatter` por `plot`:
-
-"""
-
-# ╔═╡ c5101ce8-7a70-421a-81c6-efa16b368dd1
-plot(R,R,h.(R,R))
-
-# ╔═╡ 33cfe266-21ab-43e5-bcca-ec75dd12f49b
-md"""#### Superficies en tres dimensiones con `surface` y `wireframe`
-
-Para graficar una función de $\mathbb{R}^2$ en $\mathbb{R}$ como una _superficie_, utilizamos la función `surface`. La sintáxis usual es
-
-`surface(x,y,h)`
-
-donde `x` es un arreglo con un rango de valores del eje X, `y` es un arreglo con un rango de valores del eje Y y `h` es la función en cuestión.
-
-Por ejemplo:
-
-"""
-
-# ╔═╡ 56c967bd-feb0-4266-8209-3c97379152b1
-surface(R,R,h, color = :gist_rainbow)
-
-# ╔═╡ 8eefdb22-91ad-494b-979a-d3b2a17f706e
-md"Para representar esta superficie como una _malla_ creada a partir de los puntos de la forma `[x[i],y[i]]` en los que se evalúa la función `h`, podemos usar la función `wireframe` con la misma sintáxis que `surface`:"
-
-# ╔═╡ 2d598963-c0e9-4808-93b0-d02740da047c
-wireframe(R,R,h)
-
-# ╔═╡ e97b0843-45c9-4131-a52c-4880a644d5cb
-md"**Nota** Las funciones `quiver`, `contour`, `surface` y `wireframe` también tienen su versión _modificadora_ con el símbolo `!` al final."
-
-# ╔═╡ 754d5a6b-845b-4074-8686-96e1b57e088d
-md"""## Animaciones
-
-### `@gif`
-
-La forma más fácil de animar un conjunto de gráficas es escribiendo la palabra `@gif` al inicio de un ciclo _for_ que genere las gráficas.
-
-Por ejemplo, sabemos que la función de dos variables
-
-$$A\sin(Bx - t) + C$$
-
-describe una onda sinodal que se mueve hacia la derecha, donde $A$ es la amplitud de la onda, $B$ es la frecuencia, y $C$ es la distancia del origen de la onda al eje horizontal.
-
-Podemos animar esto como sigue:
-
-"""
-
-# ╔═╡ 0b199197-6d85-4530-b70f-b82e16d183d6
-begin
-	A = 0.5    # Definimos los valores de los parámetros.
-	B = 2
-	C = 0.25
-	f(x) = A*sin(B*x)+C # Definimos la función f.
-	
-	@gif for t in 0:0.1:2π # para t en 0:0.1:2π
-	plot(f.( range(0,2π, step = 0.1) .- t/B),
-		 legend = false, title = L"A\sin(Bx-t)+C")
-    #= grafica Asin(B(x-t/B))+C = Asin(Bx-t)+C para todas
-	las x en el rango de 0 a 2π con tamaño de paso 0.1 =#
-		
+	n=100                          #Cantidad de puntos
+	x=rand(Uniform(-1/2, 1/2), 1, n) #Forma un arreglo aleatorio con n columnas y una 
+                                     #fila, esto en el rango -1/2 a 1/2
+	y=rand(Uniform(-1/2, 1/2), 1, n) #Otro arreglo pero esta vez para y
+	function circunferencia(r)       #Se define la función de la circunferencia
+		theta= LinRange(0, 2*pi, 500)#Rango correspondiente
+		r*sin.(theta),r*cos.(theta)  #Coordenadas de la circunferencia
 	end
 end
 
-# ╔═╡ 09c41f2a-2be2-48e5-9b83-6e066c7e03bf
-md""" ### `@animate` y la función `gif`
-
-Otra forma de animar un conjunto de gráficas es utilizando `@animate` y la **función** `gif`. Este método permite especificar el nombre del archivo que se generará al hacer la animación, así como la cantidad de cuadros por segundo, como se muestra en el siguiente ejemplo:
-"""
-
-# ╔═╡ 46154837-a68e-4bf0-b39f-2b8670d9370c
+# ╔═╡ 7c8861a9-5d7c-45c4-8251-6e418289ffe0
 begin
-
-	#= No hace falta definir los valores de los 
-	   parámetros ni la función f, pues ya fueron 
-	   definidos en otra celda y Pluto ejecuta todas
-	   las celdas al mismo tiempo. =#
-	
-	anim = @animate for t in 0:0.1:2π # para t ∈ 0:0.1:2π
-	plot(f.( range(0,2π, step = 0.1) .- t/B),
-		 legend = false, title = L"A\sin(Bx-t)+C")
-    #= grafica Asin(B(x-t/B))+C = Asin(Bx-t)+C para todas
-	las x en el rango de 0 a 2π con tamaño de paso 0.1 =#
-		
-	end
-
-	gif(anim, "onda_en_movimiento.gif", fps = 30)
-    #= Convertimos a la variable 'anim' en un gif de 
-	nombre "onda_en_movimiento.gif" con 30 cuadros por
-	segundo. =#
-	
+	color = [a.^2+b.^2>(1/4)  ? "blue" : "red" for (a, b) in zip(x, y)]
+	# Define el color de acuerdo a si el punto se encuentra dentro del círculo (por la ecuación canónica, de lo contrario, azul)
+	plot(circunferencia(1/2), aspect_ratio=:equal, color="hotpink4", xlim=[-1/2,1/2], ylim=[-1/2,1/2]) 
+	#Dibuja la circunferencia de radio 0.5 con una proporción de la gráfica de 1:1, con límites en x como en y de [-1/2,1/2]
+	scatter!(x,y, color=color, legend = false, markersize = 2) 
+	#En la misma gráfica que el anterior, muestra los arreglos correspondientes a las entradas x,y, sin etiquetas, con un tamaño de 2
 end
 
-# ╔═╡ 167dcedf-786f-471c-83ae-d8a09885005d
-md""" #### ¿Pero qué son `@animate` y `@gif`?
-
-`@animate` y `@gif` son ejemplos de _macros_, que tienen que ver con _metaprogramación_ (lo cual no veremos en este curso). Básicamente, un _macro_ es una función cuyo trabajo es _modificar código_. En Julia, los nombres de los _macros_ inician con el símbolo `@`. 
-
-La forma de generar la misma animación anterior _sin utilizar macros_ sería como sigue:
-
-"""
-
-# ╔═╡ 765a0e10-4217-4a50-8fb1-e46bee83aaa6
+# ╔═╡ cab4aa80-7457-422a-9d97-b24a4b06f7cb
 begin
-
-	#= No hace falta definir los valores de los 
-	   parámetros ni la función f, pues ya fueron 
-	   definidos en otra celda y Pluto ejecuta todas
-	   las celdas al mismo tiempo. =#
-	
-	anim2 = Plots.Animation()
-		
-	for t in 0:0.1:2π # para t ∈ 0:0.1:2π
-		plot(f.( range(0,2π, step = 0.1) .- t/B),
-		     legend = false, title = L"A\sin(Bx-t)+C")
-    #= grafica Asin(B(x-t/B))+C = Asin(Bx-t)+C para todas
-	las x en el rango de 0 a 2π con tamaño de paso 0.1 =#
-		Plots.frame(anim2)
-	end
-
-	gif(anim2, "onda_en_movimiento.gif", fps = 30)
-    #= Convertimos a la variable 'anim' en un gif de 
-	nombre "onda_en_movimiento.gif" con 30 cuadros por
-	segundo. =#
-	
-end
-
-# ╔═╡ abbce622-7912-40ee-8632-261b5129dcb4
-md"Los _macros_ simplemente nos ahorran el tener que escribir secciones de códigos recurrentes."
-
-# ╔═╡ 7577805b-1d52-47e4-aa45-2652943db1cf
-md"""**Ejercicio** Haz un código donde definas cuatro variables `h`, `r`, `θ` y `t`, y animes el tiro parabólico de una partícula lanzada desde una altura `h` con rapidez `r` a un ángulo `θ` durante un tiempo `t`. La partícula se debe representar con un círculo y su trayectoria se debe ir trazando con una línea punteada. La animación debe terminar en cuanto la partícula toque el "suelo".
-
-Sugerencia: Repasa las ecuaciones cinemáticaticas del tiro parabólico e investiga los atributos `xaxis` y `yaxis` para poder fijar los ejes de la gráfica durante la animación."""
-
-# ╔═╡ 50f7f46b-081e-4b07-94af-1331b33a7c7f
-begin
-	H = 3    # Altura (Metros)
-	r = 35      # Rapidez inical (En metros/s)
-	θ = π/10    # Ángulo (Radianes) 
-	G = 9.81    # Graverdad 9.81 m/s^2
-	P(t) = t*tan(θ)-((G*t^2)/(2*r^2*(cos(θ))^2))+H # Función de lo posición.
-end
-
-# ╔═╡ eb57b21d-36ac-4bc7-8e8f-ef38967b3c85
-Time=(r*sin(θ)+sqrt(r^2*(sin(θ))^2+2*G*H))/(G) #Tiempo que tarda en tocar el piso
-
-# ╔═╡ 3f7b2754-9032-4f9d-a4c2-bffa64ddf222
-	T=r*cos(θ)*Time #Alcance del tiro, es decir, cuando la partícula toca el suelo
-
-# ╔═╡ 4e60883b-dff2-46dc-9f17-59ff7089e2a6
-begin
-	scatter(P,0:T, title = "Tiro parabólico", xlabel = "x", ylabel = "y", color = "indianred", label = "Recorrido")
-end
-
-# ╔═╡ 66591f6e-8c4f-4ec7-9afc-41fd5ec1dc0d
-M=H+(r^2*(sin(θ))^2)/(2*G) #Altura máxima
-
-# ╔═╡ 9fd90071-9e87-43a0-870d-630139da8180
-begin
-		x(t)=r*cos(θ)*t             #Posición en x
-		y(t)=H+r*sin(θ)*t-(G*t^2)/2 #Posición en y
-		t=0:0.1:Time                #Pasos a dar, desde el tiempo 0 hasta que toque el suelo, es decir, hasta Time
-		n=length(t)                 
-		xpos=x.(t)                  #Posición en x en el tiempo t
-		ypos=y.(t)                  #Posición en y en el tiempo t
-	begin
-	anima = @animate for i in 1:n # para t ∈ 0:n
-		scatter([xpos[i]], [ypos[i]], legend=:none, title="Trayectoria", markersize=2, markercolor="navajowhite", xaxis=("x", (0,T+T/10)), yaxis=("y", (0, M+M/10)), dpi=300) 
-	end	
-		gif(anima,"aminaciontiro.mp4",fps=30)
+	sumin=0                     #Inicio del conteo de los puntos dentro del círculo
+	sumout=0                    #Inicio del conteo de los puntos fuera del círculo
+	for i in 1:n                #Para los puntos dentro del rango de 1 a n
+		if x[1,i]^2+y[1,i]^2>(1/4) 
+	#Evalua la entrada de la fila 1, columna i de la matriz x y eleva al cuadrado, suma la entrada 1i de la matriz y al cuadrado, ¿Es mayor que 1/4?, esta evaluación viene de x^2+y^2=1/4 (ecuación canónica de la circunferencia)
+			sumout+=1 #Si es mayor, está fuera del círculo, suma 1 a sumout
+		else          #De lo contrario
+			sumin+=1  #Si es menor o igual, está dentro del círculo, suma 1 a sumin
+		end
 	end
 end
 
-# ╔═╡ 59ec3890-303c-436a-8043-8e6bc9c427ed
-md"**Ejercicio** Crea una función que tome parámetros `h`, `r`, `θ` y `t`, y haga lo descrito en el Ejercicio anterior."
-
-# ╔═╡ c3264b4d-81b1-4e0c-9205-ff818665788c
-# Tu código (comentado) va aquí :D
-
-# ╔═╡ 77aacd79-26e3-40c2-ac22-f9121aac4155
-md"""**Ejercicio** Crea una animación de cómo la superficie obtenida de la función $h(x,y) = \cos(x) + \sin(y)$ se desplaza hacia el eje Y.
-"""
-
-# ╔═╡ a3c5592b-68ec-4a65-87c6-288b1e50d2d8
+# ╔═╡ cd344344-61e2-46e1-9153-773e338da51c
 begin
-	X = Y = range(-2π, 2π, length = 40) #Definimos a X y Y
-	Z(X,Y)=sin(X)+cos(Y) # Funcioón, no usé h porque ya se había definido antes
-	ani = Plots.Animation()
-	begin
-	ani = @animate for t in -2π:0.5:2π 
-		plot!(X, Y, Z, st = [:surface])
-		Plots.frame(ani) #Anima de menos 2pi a 2pi, grafica con el arreglo X,Y,Z, muestra un mapa de color
-	end
-	gif(ani, "Z(X,Y)=sin(X)+cos(y)", fps = 30)
-	end
+	estimacion=4*sumin/n
 end
 
-# ╔═╡ 88299b4d-2a7d-4c18-956e-c6e75473c658
-md" ## Recursos complementarios
+# ╔═╡ 217a6ab4-9733-414e-80e3-501370244f15
+begin
+	a=("Con", n, "puntos totales, la estimación de π es", 4*sumin/n, "Hay", sumin, "puntos rojos", sumout, "puntos azules")
+end
 
-* Repositorio de GitHub del paquete [`Pluto`](https://github.com/fonsp/Pluto.jl).
-* Documentación de [`Plots`](https://docs.juliaplots.org/stable/).
-* Documentación de las funciones de [`Plots`](https://docs.juliaplots.org/latest/api/)
-* Repositorio de GitHub del paquete [LaTeXStrings](https://github.com/stevengj/LaTeXStrings.jl).
-* Manual de [backends de Plots](https://docs.juliaplots.org/latest/backends/) en Julia.
-* Manual de [Animaciones](https://docs.juliaplots.org/latest/animations/) en Julia.
-"
+# ╔═╡ eef92aa6-b93e-4d8e-a6ec-64dac396d3e5
+md"##### En promedio, ¿cuántos puntos necesitas generar para obtener una precisión de ±0.01?"
+
+# ╔═╡ 38264bd4-cf58-4f8b-b66b-c1da7e2dd1c2
+md"Esto es una pregunta difícil de contestar, esto debido a la naturalidad azarosa de la construcción de las coordenadas, con mucha suerte incluso se podría obtener una estimación de 3.12 con 100 puntos, con 10,000 puntos 13/20 tuvo esa precisión, incluso podría decir que (con muy pequeña probabilidad) todos los puntos caigan fuera del círculo y la estimación termine siendo 0."
+
+# ╔═╡ 50cb4faf-ba0f-4a30-9a77-08f3ddcc6bf2
+begin  
+function aproxpi(n)      #Función aproxpi dependiente de n, n es la cantidad de puntos
+	X=rand(Uniform(-1/2, 1/2), 1, n)#Arreglo de una columna con 2 filas, entradas de 
+                                    # -1/2 a 1/2
+	Y=rand(Uniform(-1/2, 1/2), 1, n) 
+	p = 4*count(X.^2 .+ Y.^2 .< 1/4)/n 
+	#P es la aproximación, cuenta si los puntos están dentro del círculo, divide entre el total de puntos y multiplica por 4
+end
+end
+
+# ╔═╡ d8101d3d-a5de-4bef-a86e-4b9b1c2f3cdc
+aproxpi(10000)
+
+# ╔═╡ cdba54ce-b884-4fb7-b72f-8be4fb1b69e8
+md"##### Realiza una gráfica del error de la estimación en función del número de puntos comparando contra el valor predeterminado de π de Julia"
+
+# ╔═╡ 4f8a3714-ae3d-4e37-8283-5c1d86fcc2dd
+begin
+	A=[1,5,10,50,100,500,1000,5000,10000,50000,100000,500000,1000000] #Arreglo para observar los diferentes valores de la aproximación
+	B=aproxpi.(A) #Aplicacamos la funcion aproxpi al vector A
+	C=A./A.*pi   #No se nos ocurrió manera más elegante para graficar pi ):
+	D=abs.(pi.-B)
+end
+
+# ╔═╡ 9fb92e64-9c9d-40d4-89b4-d5863d70dcca
+begin
+	scatter(A,B, xaxis=:log, xlabel = "Cantidad de puntos", ylabel = "Aproximación de π", color=:"lightcoral", markerstrokewidth=0, title="Estimación de π (método de Montecarlo)", label="Estimación de π") #Grafica la aproxpi de A, con escala logarítmica
+	plot!(A,C, linecolor = :"palevioletred", label="Valor de π") #Valor real de Pi
+end
+
+# ╔═╡ 87d1758b-c481-46cb-b645-8c90925cef12
+plot(A,D, xaxis=:log, xlabel = "Cantidad de puntos", ylabel = "Error (π-estimación)", color=:"lightcoral", label=false, title="Error de la estimación") #Grafica del valor absoluto de la resta de pi menor la estimación con el método de montecarlo.
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
-LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 
 [compat]
-LaTeXStrings = "~1.3.0"
-Plots = "~1.27.5"
+Distributions = "~0.25.57"
+Plots = "~1.28.2"
 PlutoUI = "~0.7.38"
 """
 
@@ -600,6 +152,12 @@ git-tree-sha1 = "4b859a208b2397a7a623a03449e4636bdb17bcf2"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
 version = "1.16.1+1"
 
+[[deps.Calculus]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "f641eb0a4f00c343bbc32346e1217b86f3ce9dad"
+uuid = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
+version = "0.5.1"
+
 [[deps.ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra", "SparseArrays"]
 git-tree-sha1 = "9950387274246d08af38f6eef8cb5480862a435f"
@@ -632,9 +190,9 @@ version = "0.12.8"
 
 [[deps.Compat]]
 deps = ["Base64", "Dates", "DelimitedFiles", "Distributed", "InteractiveUtils", "LibGit2", "Libdl", "LinearAlgebra", "Markdown", "Mmap", "Pkg", "Printf", "REPL", "Random", "SHA", "Serialization", "SharedArrays", "Sockets", "SparseArrays", "Statistics", "Test", "UUIDs", "Unicode"]
-git-tree-sha1 = "96b0bc6c52df76506efc8a441c6cf1adcb1babc4"
+git-tree-sha1 = "b153278a25dd42c65abbf4e62344f9d22e59191b"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
-version = "3.42.0"
+version = "3.43.0"
 
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -647,9 +205,9 @@ uuid = "d38c429a-6771-53c6-b99e-75d170b6e991"
 version = "0.5.7"
 
 [[deps.DataAPI]]
-git-tree-sha1 = "cc70b17275652eb47bc9e5f81635981f13cea5c8"
+git-tree-sha1 = "fb5f5316dd3fd4c5e7c30a24d50643b73e37cd40"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
-version = "1.9.0"
+version = "1.10.0"
 
 [[deps.DataStructures]]
 deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
@@ -670,9 +228,21 @@ uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
 deps = ["Mmap"]
 uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 
+[[deps.DensityInterface]]
+deps = ["InverseFunctions", "Test"]
+git-tree-sha1 = "80c3e8639e3353e5d2912fb3a1916b8455e2494b"
+uuid = "b429d917-457f-4dbc-8f4c-0cc954292b1d"
+version = "0.4.0"
+
 [[deps.Distributed]]
 deps = ["Random", "Serialization", "Sockets"]
 uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
+
+[[deps.Distributions]]
+deps = ["ChainRulesCore", "DensityInterface", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SparseArrays", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns", "Test"]
+git-tree-sha1 = "f206814c860c2a909d2a467af0484d08edd05ee7"
+uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
+version = "0.25.57"
 
 [[deps.DocStringExtensions]]
 deps = ["LibGit2"]
@@ -683,6 +253,12 @@ version = "0.8.6"
 [[deps.Downloads]]
 deps = ["ArgTools", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
+
+[[deps.DualNumbers]]
+deps = ["Calculus", "NaNMath", "SpecialFunctions"]
+git-tree-sha1 = "5837a837389fccf076445fce071c8ddaea35a566"
+uuid = "fa6b7ba4-c1ee-5f82-b5fc-ecf0adba8f74"
+version = "0.6.8"
 
 [[deps.EarCut_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -707,6 +283,12 @@ deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers",
 git-tree-sha1 = "d8a578692e3077ac998b50c0217dfd67f21d1e5f"
 uuid = "b22a6f82-2f65-5046-a5b2-351ab43fb4e5"
 version = "4.4.0+0"
+
+[[deps.FillArrays]]
+deps = ["LinearAlgebra", "Random", "SparseArrays", "Statistics"]
+git-tree-sha1 = "246621d23d1f43e3b9c368bf3b72b2331a27c286"
+uuid = "1a297f60-69ca-5386-bcde-b61e274b549b"
+version = "0.13.2"
 
 [[deps.FixedPointNumbers]]
 deps = ["Statistics"]
@@ -796,6 +378,12 @@ deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll",
 git-tree-sha1 = "129acf094d168394e80ee1dc4bc06ec835e510a3"
 uuid = "2e76f6c2-a576-52d4-95c1-20adfe4de566"
 version = "2.8.1+1"
+
+[[deps.HypergeometricFunctions]]
+deps = ["DualNumbers", "LinearAlgebra", "SpecialFunctions", "Test"]
+git-tree-sha1 = "65e4589030ef3c44d3b90bdc5aac462b4bb05567"
+uuid = "34004b35-14d8-5ef3-9330-4cdb6864b03a"
+version = "0.3.8"
 
 [[deps.Hyperscript]]
 deps = ["Test"]
@@ -887,9 +475,9 @@ version = "1.3.0"
 
 [[deps.Latexify]]
 deps = ["Formatting", "InteractiveUtils", "LaTeXStrings", "MacroTools", "Markdown", "Printf", "Requires"]
-git-tree-sha1 = "6f14549f7760d84b2db7a9b10b88cd3cc3025730"
+git-tree-sha1 = "46a39b9c58749eefb5f2dc1178cb8fab5332b1ab"
 uuid = "23fbe1c1-3f47-55db-b15f-69d7ec21a316"
-version = "0.15.14"
+version = "0.15.15"
 
 [[deps.LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
@@ -964,9 +552,9 @@ uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
 [[deps.LogExpFunctions]]
 deps = ["ChainRulesCore", "ChangesOfVariables", "DocStringExtensions", "InverseFunctions", "IrrationalConstants", "LinearAlgebra"]
-git-tree-sha1 = "58f25e56b706f95125dcb796f39e1fb01d913a71"
+git-tree-sha1 = "76c987446e8d555677f064aaac1145c4c17662f8"
 uuid = "2ab3a3ac-af41-5b50-aa03-7779005ae688"
-version = "0.3.10"
+version = "0.3.14"
 
 [[deps.Logging]]
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
@@ -1026,11 +614,21 @@ version = "1.3.5+1"
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
 
+[[deps.OpenLibm_jll]]
+deps = ["Artifacts", "Libdl"]
+uuid = "05823500-19ac-5b8b-9628-191a04bc5112"
+
 [[deps.OpenSSL_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "ab05aa4cc89736e95915b01e7279e61b1bfe33b8"
 uuid = "458c3c95-2e84-50aa-8efc-19380b2a3a95"
 version = "1.1.14+0"
+
+[[deps.OpenSpecFun_jll]]
+deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "13652491f6856acfd2db29360e1bbcd4565d04f1"
+uuid = "efe28fd5-8261-553b-a9e1-b2916fc3738e"
+version = "0.5.5+0"
 
 [[deps.Opus_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1049,11 +647,17 @@ git-tree-sha1 = "b2a7af664e098055a7529ad1a900ded962bca488"
 uuid = "2f80f16e-611a-54ab-bc61-aa92de5b98fc"
 version = "8.44.0+0"
 
+[[deps.PDMats]]
+deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse"]
+git-tree-sha1 = "3114946c67ef9925204cc024a73c9e679cebe0d7"
+uuid = "90014a1f-27ba-587c-ab20-58faa44d9150"
+version = "0.11.8"
+
 [[deps.Parsers]]
 deps = ["Dates"]
-git-tree-sha1 = "621f4f3b4977325b9128d5fae7a8b4829a0c2222"
+git-tree-sha1 = "1285416549ccfcdf0c50d4997a94331e88d68413"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "2.2.4"
+version = "2.3.1"
 
 [[deps.Pixman_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1079,9 +683,9 @@ version = "1.2.0"
 
 [[deps.Plots]]
 deps = ["Base64", "Contour", "Dates", "Downloads", "FFMPEG", "FixedPointNumbers", "GR", "GeometryBasics", "JSON", "Latexify", "LinearAlgebra", "Measures", "NaNMath", "Pkg", "PlotThemes", "PlotUtils", "Printf", "REPL", "Random", "RecipesBase", "RecipesPipeline", "Reexport", "Requires", "Scratch", "Showoff", "SparseArrays", "Statistics", "StatsBase", "UUIDs", "UnicodeFun", "Unzip"]
-git-tree-sha1 = "88ee01b02fba3c771ac4dce0dfc4ecf0cb6fb772"
+git-tree-sha1 = "9101f17d98edd72a44db95afcaf3534d500da058"
 uuid = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
-version = "1.27.5"
+version = "1.28.2"
 
 [[deps.PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "Markdown", "Random", "Reexport", "UUIDs"]
@@ -1091,9 +695,9 @@ version = "0.7.38"
 
 [[deps.Preferences]]
 deps = ["TOML"]
-git-tree-sha1 = "d3538e7f8a790dc8903519090857ef8e1283eecd"
+git-tree-sha1 = "47e5f437cc0e7ef2ce8406ce1e7e24d44915f88d"
 uuid = "21216c6a-2e73-6563-6e65-726566657250"
-version = "1.2.5"
+version = "1.3.0"
 
 [[deps.Printf]]
 deps = ["Unicode"]
@@ -1104,6 +708,12 @@ deps = ["Artifacts", "CompilerSupportLibraries_jll", "Fontconfig_jll", "Glib_jll
 git-tree-sha1 = "c6c0f690d0cc7caddb74cef7aa847b824a16b256"
 uuid = "ea2cea3b-5b76-57ae-a6ef-0a8af62496e1"
 version = "5.15.3+1"
+
+[[deps.QuadGK]]
+deps = ["DataStructures", "LinearAlgebra"]
+git-tree-sha1 = "78aadffb3efd2155af139781b8a8df1ef279ea39"
+uuid = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
+version = "2.4.2"
 
 [[deps.REPL]]
 deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
@@ -1141,6 +751,18 @@ git-tree-sha1 = "838a3a4188e2ded87a4f9f184b4b0d78a1e91cb7"
 uuid = "ae029012-a4dd-5104-9daa-d747884805df"
 version = "1.3.0"
 
+[[deps.Rmath]]
+deps = ["Random", "Rmath_jll"]
+git-tree-sha1 = "bf3188feca147ce108c76ad82c2792c57abe7b1f"
+uuid = "79098fc4-a85e-5d69-aa6a-4863f24498fa"
+version = "0.7.0"
+
+[[deps.Rmath_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "68db32dff12bb6127bac73c209881191bf0efbb7"
+uuid = "f50d1b31-88e8-58de-be2c-1cc44531875f"
+version = "0.3.0+0"
+
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 
@@ -1176,11 +798,17 @@ version = "1.0.1"
 deps = ["LinearAlgebra", "Random"]
 uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
+[[deps.SpecialFunctions]]
+deps = ["ChainRulesCore", "IrrationalConstants", "LogExpFunctions", "OpenLibm_jll", "OpenSpecFun_jll"]
+git-tree-sha1 = "5ba658aeecaaf96923dce0da9e703bd1fe7666f9"
+uuid = "276daf66-3868-5448-9aa4-cd146d93841b"
+version = "2.1.4"
+
 [[deps.StaticArrays]]
 deps = ["LinearAlgebra", "Random", "Statistics"]
-git-tree-sha1 = "4f6ec5d99a28e1a749559ef7dd518663c5eca3d5"
+git-tree-sha1 = "cd56bf18ed715e8b09f06ef8c6b781e6cdc49911"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "1.4.3"
+version = "1.4.4"
 
 [[deps.Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]
@@ -1188,9 +816,9 @@ uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [[deps.StatsAPI]]
 deps = ["LinearAlgebra"]
-git-tree-sha1 = "c3d8ba7f3fa0625b062b82853a7d5229cb728b6b"
+git-tree-sha1 = "c82aaa13b44ea00134f8c9c89819477bd3986ecd"
 uuid = "82ae8749-77ed-4fe6-ae5f-f523153014b0"
-version = "1.2.1"
+version = "1.3.0"
 
 [[deps.StatsBase]]
 deps = ["DataAPI", "DataStructures", "LinearAlgebra", "LogExpFunctions", "Missings", "Printf", "Random", "SortingAlgorithms", "SparseArrays", "Statistics", "StatsAPI"]
@@ -1198,11 +826,21 @@ git-tree-sha1 = "8977b17906b0a1cc74ab2e3a05faa16cf08a8291"
 uuid = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 version = "0.33.16"
 
+[[deps.StatsFuns]]
+deps = ["ChainRulesCore", "HypergeometricFunctions", "InverseFunctions", "IrrationalConstants", "LogExpFunctions", "Reexport", "Rmath", "SpecialFunctions"]
+git-tree-sha1 = "ca9f8a0c9f2e41431dc5b7697058a3f8f8b89498"
+uuid = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
+version = "1.0.0"
+
 [[deps.StructArrays]]
 deps = ["Adapt", "DataAPI", "StaticArrays", "Tables"]
-git-tree-sha1 = "57617b34fa34f91d536eb265df67c2d4519b8b98"
+git-tree-sha1 = "8f705dd141733d79aa2932143af6c6e0b6cea8df"
 uuid = "09ab397b-f2b6-538f-b94a-2f83cf4a842a"
-version = "0.6.5"
+version = "0.6.6"
+
+[[deps.SuiteSparse]]
+deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
+uuid = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
 
 [[deps.TOML]]
 deps = ["Dates"]
@@ -1467,83 +1105,21 @@ version = "0.9.1+5"
 """
 
 # ╔═╡ Cell order:
-# ╟─c3db98d4-84a3-11ec-17c2-7510b678ee8a
-# ╠═33f8289b-3e80-48a1-8a2c-ef6d2d2f107e
-# ╟─b3f850d8-60d4-4798-9beb-d42a9cdac9ae
-# ╟─8c5b9695-3625-4105-8a4f-9358e208115c
-# ╠═67c22c14-24a6-4080-803b-fba2be7d0fa4
-# ╟─22a9aee4-4c6d-47d3-8cca-e41e542a84ed
-# ╠═9bfbf61b-66b5-42d3-878b-fb02dd6d41ee
-# ╟─e16ca2f5-4af7-4d16-b76e-4f124e1ddbbf
-# ╠═98c6c916-cdfa-4bc1-baad-8888aace5c98
-# ╟─c6a475fd-bef2-4c09-a03b-211f6676d215
-# ╟─7a1e75c3-d56b-411e-a82c-f4b53302ac23
-# ╠═d2472d6a-7072-49ae-ba55-207db17be3ca
-# ╟─4d136dae-c66d-4c9e-a267-12b2fa9fd596
-# ╠═cdd16f8e-e945-4d5f-a71d-6896f9146512
-# ╠═af69d454-96fc-4e92-af71-1251cf99ae38
-# ╠═576a42f0-bd11-4480-9e97-2f9098312a25
-# ╠═35d05477-a09e-4077-8513-2ac7dba4def1
-# ╟─fe4198bf-345a-46e5-bfeb-15619bd76f3a
-# ╠═c6c40996-bb5f-4c4b-848b-821c79660042
-# ╠═d6a012c7-47b6-4374-8522-aa8e6efbe84f
-# ╠═4d68a04e-6502-4478-a9c2-8a81bcc2b282
-# ╟─d8875d6b-7a53-43ad-87b4-5088e0fc9eac
-# ╠═0dd653e6-323f-450d-9097-ba4c0a304aa3
-# ╟─809327b3-0353-4519-a586-93403d121169
-# ╠═d0ec9526-1bf9-4e38-be43-9aeedc56e97e
-# ╟─f08d2863-8e08-4df1-a3e9-5914dc8f1600
-# ╠═fc94b6e8-cae9-46bc-9ac4-9cee5e86c8ee
-# ╟─77a60b5d-ad7f-4c44-a68d-694417619668
-# ╟─8b8aff3c-3d88-4022-bc86-b75ebefde2a3
-# ╠═6adc3398-c314-4760-927e-02cc67861d0a
-# ╠═32387b91-9337-40af-a740-158a67552cd5
-# ╟─acfe0334-c7aa-471f-b39e-8276e2e3dd42
-# ╠═8302701b-02ac-4d35-b7de-5dec8fe701fb
-# ╟─02f9778e-21c8-42db-bed6-95a20d592f22
-# ╟─1907f78f-e429-4a77-a90e-c9ebb94d6385
-# ╠═18368069-bf83-48e9-a6df-a2b5e6181277
-# ╟─ec3dfa07-89c8-48a3-adaf-021c311d2c0d
-# ╠═73d1cb8f-4fc5-4a11-885d-9bc97ecd73d9
-# ╟─324cf67f-7cf1-4613-b072-aff38958612f
-# ╠═7c580a14-b5ec-4bb1-960b-fbce583a9b62
-# ╟─8eac3ff8-f71a-41b2-a3b2-5d7965270cdf
-# ╟─3910bcbb-0e94-4c70-93c4-106a5fd4006a
-# ╠═d6d981f5-155f-4fa9-8985-ef9a1aa8e28c
-# ╟─cc3f06b5-68b4-40c6-85ce-cb79a7f3a9df
-# ╠═7c8f914f-ad47-4487-8434-f02f2ce6d9e6
-# ╟─28bff1c1-4fe1-41ce-92fa-09277a48762b
-# ╠═8af3a0a7-df3b-4204-a806-9c330e636d84
-# ╟─db29912b-936a-4770-9f3b-fcd57a1ffd3a
-# ╟─cd549e6e-23f6-4591-a21e-bcc3936e4b0e
-# ╠═690f92de-4beb-452b-be8e-9469efd06632
-# ╟─2caaaf8d-21f2-4cb8-9c06-b84e36b7e28c
-# ╠═3497133e-f009-47ba-bb70-c3c6d0b8bf7c
-# ╟─162a90d2-eda7-4a3a-b433-8c323bcf1334
-# ╠═c5101ce8-7a70-421a-81c6-efa16b368dd1
-# ╟─33cfe266-21ab-43e5-bcca-ec75dd12f49b
-# ╠═56c967bd-feb0-4266-8209-3c97379152b1
-# ╟─8eefdb22-91ad-494b-979a-d3b2a17f706e
-# ╠═2d598963-c0e9-4808-93b0-d02740da047c
-# ╟─e97b0843-45c9-4131-a52c-4880a644d5cb
-# ╟─754d5a6b-845b-4074-8686-96e1b57e088d
-# ╠═0b199197-6d85-4530-b70f-b82e16d183d6
-# ╟─09c41f2a-2be2-48e5-9b83-6e066c7e03bf
-# ╠═46154837-a68e-4bf0-b39f-2b8670d9370c
-# ╟─167dcedf-786f-471c-83ae-d8a09885005d
-# ╠═765a0e10-4217-4a50-8fb1-e46bee83aaa6
-# ╟─abbce622-7912-40ee-8632-261b5129dcb4
-# ╟─7577805b-1d52-47e4-aa45-2652943db1cf
-# ╠═50f7f46b-081e-4b07-94af-1331b33a7c7f
-# ╠═eb57b21d-36ac-4bc7-8e8f-ef38967b3c85
-# ╠═3f7b2754-9032-4f9d-a4c2-bffa64ddf222
-# ╠═4e60883b-dff2-46dc-9f17-59ff7089e2a6
-# ╠═66591f6e-8c4f-4ec7-9afc-41fd5ec1dc0d
-# ╠═9fd90071-9e87-43a0-870d-630139da8180
-# ╟─59ec3890-303c-436a-8043-8e6bc9c427ed
-# ╠═c3264b4d-81b1-4e0c-9205-ff818665788c
-# ╟─77aacd79-26e3-40c2-ac22-f9121aac4155
-# ╠═a3c5592b-68ec-4a65-87c6-288b1e50d2d8
-# ╟─88299b4d-2a7d-4c18-956e-c6e75473c658
+# ╠═ab3ddc10-ccce-11ec-2bac-0975bbb93a6d
+# ╟─0e91569d-c5c7-4b32-af84-1d9a1d865768
+# ╟─d28a7306-0b84-4436-9dde-e23fc7927cbe
+# ╠═adfee34c-3403-4192-975f-3355787da9e2
+# ╟─7c8861a9-5d7c-45c4-8251-6e418289ffe0
+# ╟─cab4aa80-7457-422a-9d97-b24a4b06f7cb
+# ╟─cd344344-61e2-46e1-9153-773e338da51c
+# ╟─217a6ab4-9733-414e-80e3-501370244f15
+# ╟─eef92aa6-b93e-4d8e-a6ec-64dac396d3e5
+# ╟─38264bd4-cf58-4f8b-b66b-c1da7e2dd1c2
+# ╠═d8101d3d-a5de-4bef-a86e-4b9b1c2f3cdc
+# ╠═50cb4faf-ba0f-4a30-9a77-08f3ddcc6bf2
+# ╟─cdba54ce-b884-4fb7-b72f-8be4fb1b69e8
+# ╠═4f8a3714-ae3d-4e37-8283-5c1d86fcc2dd
+# ╠═9fb92e64-9c9d-40d4-89b4-d5863d70dcca
+# ╠═87d1758b-c481-46cb-b645-8c90925cef12
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
