@@ -4,115 +4,304 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ ab3ddc10-ccce-11ec-2bac-0975bbb93a6d
-using Plots, Distributions, PlutoUI
+# ╔═╡ 87df961f-656f-4a42-b5c2-fef7d5201a01
+using  Distributions, Plots         #Este paquete permite utilizar la función Uniform
 
-# ╔═╡ 0e91569d-c5c7-4b32-af84-1d9a1d865768
-md"### Ejercicio 3"
+# ╔═╡ f4a77582-9121-4881-8139-fcb01d4ef6b9
+html"""
+<style>
+	main {
+		margin: 0 auto;
+		max-width: 2000px;
+    	padding-left: max(160px, 10%);
+    	padding-right: max(160px, 10%);
+	}
+</style>
+"""
 
-# ╔═╡ d28a7306-0b84-4436-9dde-e23fc7927cbe
-md"##### Escribe un algoritmo que estime el valor de π y que te permita visualizar algo similar al gráfico de la Figura 2, asegúrate de incluir el conteo del número de puntos rojos, número de puntos totales, y la respectiva estimación de π."
+# ╔═╡ 6f5f31aa-2941-42f5-aceb-bedb2bd30ea2
+md"# Caminante aleatorio
+Un caminante aleatorio (o _random walk_, en inglés) es un tipo de modelo estocástico en el cual la posición de una partícula en cierto instante depende de su posición en el instante previo y alguna variable aleatoria que determina su subsecuente dirección y la longitud de paso.
 
-# ╔═╡ adfee34c-3403-4192-975f-3355787da9e2
+Este tipo de modelo es muy útil para hacer simulaciones en Física Estadística; por ejemplo, se puede utilizar para modelar el movimiento browniano de moléculas en un gas.
+"
+
+# ╔═╡ 62816dec-c81a-40cb-aebd-8bda77d5e389
+md" ## Caminante aleatorio en una dimensión
+El modelo más sencillo de un caminante aleatorio es aquel en el que una partícula:
+* se mueve en un tiempo discreto y en intervalos de tiempo uniformes;
+* se mueve en un espacio discreto de una sola dimensión con tamaño de paso uniforme;
+* en cada paso, tiene igual probabilidad de moverse en cualquiera de los dos sentidos posibles.
+
+Los primeros dos puntos son fáciles de modelar: para el primer punto, podemos modelar el tiempo con los números naturales y, para el segundo, podemos modelar el espacio con los números enteros, suponiendo -por simplicidad- que la posición inicial de la partícula es el origen (`0`) y que el tamaño de casa paso es `1`. En otras palabras, para simular el paso del tiempo podemos iterar sobre un arreglo de números naturales consecutivos y, para registar cada posición, podemos crear un arreglo que inicialmente sólo contenga la posición inicial, (`[0]`) y posteriormente añadir las posiciones subsecuentes como entradas a este arreglo.
+
+La cuestión ahora es, ¿cómo modelamos el tercer punto?
+"
+
+# ╔═╡ 6dd575bd-5ee7-49ab-8234-ab83eff83ebf
+md"### La función `rand`
+Julia tiene varias funciones para generar números aleatorios (puedes consultar su documentación [aquí](https://docs.julialang.org/en/v1/stdlib/Random/#Random-generation-functions)). Una de ellas es `rand`. Para conocer lo que hace esta función a través de ejemplos, crea celdas individuales para cada uno de los siguientes comandos y ejecuta cada una de ellas varias veces hasta que tengas una idea de qué es lo que hacen:
+* `rand()`
+* `rand(Int)`
+* `rand(Bool)`"
+
+# ╔═╡ 21f8ead8-8ff7-417c-8d8c-65846fb2ee06
+rand()
+
+# ╔═╡ 08d1377d-2f7e-48ac-b4b3-bb8cf0707753
+rand(Int)
+
+# ╔═╡ 779b02e9-661e-462b-ab36-caddf0cf5044
+rand(Bool)
+
+# ╔═╡ d3e89523-095f-4f2f-aa2c-b38887c187eb
+md"Ahora, haz lo mismo para los siguientes comandos, creando las nuevas celdas _debajo_ de la celda que define a la variable `n=1` (y arriba del **Ejercicio**) y cambiando el valor de `n` (ejecutando la celda en la que se define) varias veces antes de revisar la documentación de nuevo:
+* `rand(n)`
+* `rand(Int,n)`
+* `rand(Bool,n)`"
+
+# ╔═╡ 712bfc18-334c-470f-8809-1a1388be7b66
+N=4
+
+# ╔═╡ e9b135bb-5053-4137-8b1d-701d7d6ec7b4
+rand(N)
+
+# ╔═╡ 23378cfc-d0c5-46fd-ac00-e59fd0909301
+rand(Int,N)
+
+# ╔═╡ f3f8bf11-6358-4f39-9749-0189161df5f6
+rand(Bool,N)
+
+# ╔═╡ 97ec59e8-2d0d-43d3-b2c8-dd74c7020352
+md"**Ejercicio** Crea una función `aleatorioUniforme` que tome como argumentos dos números `a` y `b`, y devuelva como salida un número aleatorio distribuido uniformemente en el intervalo $[a,b]\subset\mathbb{R}$. (Sugerencia: Utiliza `rand()` y un poco de aritmética.)"
+
+# ╔═╡ d4caf15c-4f99-44e4-9222-519433799348
+function aleatorioUniforme(a,b,n)       #Función aleatorio uniforme, con variables a, b y n
+  rand(Uniform(a, b), 1, n)            #Escoge un número aleatorio entre a, b, de una fila y n columnas
+end
+
+# ╔═╡ 88b91aab-5fa3-4d55-a06c-f0906b162152
 begin
-	n=100                          #Cantidad de puntos
-	x=rand(Uniform(-1/2, 1/2), 1, n) #Forma un arreglo aleatorio con n columnas y una 
-                                     #fila, esto en el rango -1/2 a 1/2
-	y=rand(Uniform(-1/2, 1/2), 1, n) #Otro arreglo pero esta vez para y
-	function circunferencia(r)       #Se define la función de la circunferencia
-		theta= LinRange(0, 2*pi, 500)#Rango correspondiente
-		r*sin.(theta),r*cos.(theta)  #Coordenadas de la circunferencia
+	aleatorioUniforme(0,5,5)
+end
+
+# ╔═╡ 737eb77d-ce3f-4eac-9f38-5cbae8bd2636
+md"**Ejercicio** Verifica con un histograma que tu función `aleatorioUniforme` realmente cumpla la propiedad desada. (Pista: ¿Cómo debería verse el histograma?)"
+
+# ╔═╡ 75298007-9b20-4ca7-a94a-b94c0785073c
+begin
+	histogram([aleatorioUniforme(0,1,10)], bins=20, alpha=0.4, label="A")
+end
+
+# ╔═╡ 5eedcedb-7dd6-45b0-8a06-238bf6b358f7
+md" ### Modelando una caminata aleatoria
+
+Como estamos modelando el espacio con los números enteros, cada paso sucesivo de nuestro caminante aleatorio debería sumar o restar `1` a la posición anterior con igual probabilidad. 
+
+**Ejercicio** Crea una función `unPaso` que no tome argumentos de entrada y devuelva sólamente los valores `1` y `-1` con igual probabilidad. (Pista: La forma más sencilla de hacerlo es usando `rand(Bool)` y un poco de aritmética...)"
+
+# ╔═╡ fc77bf6a-1864-431a-bd9b-0e3a471d81b7
+function unPaso()
+	-(-1)^rand(Bool)
+end
+
+# ╔═╡ a07c0713-ca1b-49a6-870b-426979a36d16
+unPaso()
+
+# ╔═╡ d3a7fcb3-b0a5-4b41-bf95-ac3ffdce7fb6
+md" **Ejercicio** Crea una función `variosPasos` que tome como argumento un número entero `n` y devuelva un arreglo con `n` entradas, donde cada una de ellas tiene la misma probabilidad de ser `1` ó `-1`. (Pista: Recuerda que colocar un punto (`.`) antes de un operador aritmético hace que funcione con arreglos.)"
+
+# ╔═╡ 544fdf8f-fb78-40be-8618-f071c47f00b2
+function variosPasos(M)
+	rand((-1, 1), 1, M)    #Para agilizar, se dan los posibles números (-1 y 1), en un arreglo de 1 fila y M columnas
+end
+
+# ╔═╡ 2178c065-7114-4edd-8742-4b8d2561f4fa
+variosPasos(8)
+
+# ╔═╡ f2bb54fd-ccb9-4e8d-b8c4-3a4058ffbe4c
+md" **Ejercicio** Crea una función `caminataAleatoria` que
+* tome como entrada un número de pasos `n` y
+* devuelva como salida un arreglo con `n+1` posiciones, incluyendo la posición inicial `0`, siguiendo una caminata aleatoria. (Sugerencia: Puedes usar cualquiera de las funciones `unPaso` o `variosPasos`; la que te resulte más cómoda.)"
+
+# ╔═╡ e068927b-38b9-40e7-b3f6-5f11da246cbd
+function caminataAleatoria(f)           #Definimos la función caminataAleatoria con f la cantidad de pasos
+	c=zeros(f+1, 1)                      #Hacemos un array ceros, con una fila y f+1 columnas
+	for i in 2:f+1                      #Para toda i desde dos hasta f+1; comenzamos desde 2 porque la entrada de m[1,1] debe ser la posición inical
+		c[i, 1]=c[i-1,1]+unPaso()      #Función recursiva, la entrada [1,i] se va definir a partir de la entrada anterior, 
+		                                #es decir [1,i-1] más la función un paso 
 	end
+	return c                            #Devuelve la matriz c
 end
 
-# ╔═╡ 7c8861a9-5d7c-45c4-8251-6e418289ffe0
-begin
-	color = [a.^2+b.^2>(1/4)  ? "blue" : "red" for (a, b) in zip(x, y)]
-	# Define el color de acuerdo a si el punto se encuentra dentro del círculo (por la ecuación canónica, de lo contrario, azul)
-	plot(circunferencia(1/2), aspect_ratio=:equal, color="hotpink4", xlim=[-1/2,1/2], ylim=[-1/2,1/2]) 
-	#Dibuja la circunferencia de radio 0.5 con una proporción de la gráfica de 1:1, con límites en x como en y de [-1/2,1/2]
-	scatter!(x,y, color=color, legend = false, markersize = 2) 
-	#En la misma gráfica que el anterior, muestra los arreglos correspondientes a las entradas x,y, sin etiquetas, con un tamaño de 2
+# ╔═╡ 1e68a5ca-d78e-4371-a63c-d329d11b187f
+md"""**Ejercicio** Crea una función `graficaCaminata` que
+
+* tome como entrada un arreglo -que supondremos que simula una caminata aleatoria en una dimensión- y 
+* devuelva como salida una gráfica de posición contra número de pasos, con etiquetas en los ejes.
+
+(Sugerencia: Crea un bloque de código con `begin` y `end` para poder hacer todo en una sola celda de Pluto.)
+
+Luego, en una celda aparte, define una variable `x` como un número entero positivo y aplica tu función `graficaCaminata` a `caminataAleatoria(x)` para generar gráficas de caminatas aleatorias.
+"""
+
+# ╔═╡ c0f7aa17-1013-4fdf-988e-20e8eb492643
+function graficaCaminata(G)    #FUNCION GRAFICACAMINATA
+	Y=caminataAleatoria(G)     #Posición respecto a Y
+	return plot(0:G,Y,title = "Caminata aleatoria", xlabel = "Número de pasos", ylabel = "Posición", color = "lightpink2", label =false)
+	#Devuelve la gráfica comenzando en cero de uno en uno hasta G(cantidad de pasos), y del eje Y devuelve el arreglo de camianataaleatoria
 end
 
-# ╔═╡ cab4aa80-7457-422a-9d97-b24a4b06f7cb
-begin
-	sumin=0                     #Inicio del conteo de los puntos dentro del círculo
-	sumout=0                    #Inicio del conteo de los puntos fuera del círculo
-	for i in 1:n                #Para los puntos dentro del rango de 1 a n
-		if x[1,i]^2+y[1,i]^2>(1/4) 
-	#Evalua la entrada de la fila 1, columna i de la matriz x y eleva al cuadrado, suma la entrada 1i de la matriz y al cuadrado, ¿Es mayor que 1/4?, esta evaluación viene de x^2+y^2=1/4 (ecuación canónica de la circunferencia)
-			sumout+=1 #Si es mayor, está fuera del círculo, suma 1 a sumout
-		else          #De lo contrario
-			sumin+=1  #Si es menor o igual, está dentro del círculo, suma 1 a sumin
-		end
+# ╔═╡ 7138f836-8f3f-4f18-9e8c-132671422d55
+graficaCaminata(100)
+
+# ╔═╡ 07edca52-f4bc-478f-b823-9811c320e171
+md"**Ejercicio** Crea una función `graficaCaminata!` que sea una versión modificadora de la función anterior y genera una gráfica con 5 caminatas aleatorias.
+"
+
+# ╔═╡ 896d6213-105b-403f-8aed-632303c7ba2b
+function graficaCaminata!(H,I) #H son la cantidad de caminatas aleatorias e I los pasos
+	plot()             #Grafica
+	for i in 1:H       #Para i de 1 hasta H
+		plot!(0:I,caminataAleatoria(I),title = "Caminata aleatoria", xlabel = "Número de pasos", ylabel = "Posición", label =false, lef=false) #En esencia, lo mismo que arriba
 	end
+	plot!()            #Muestra la gráfica
 end
 
-# ╔═╡ cd344344-61e2-46e1-9153-773e338da51c
-begin
-	estimacion=4*sumin/n
+# ╔═╡ ce2a6e2c-6faf-4a62-bd7f-44e10fd4ad1e
+graficaCaminata!(5,50)
+
+# ╔═╡ 75d3a337-a3b2-4319-bd1b-72d2642caef7
+md"**Ejercicio** Crea una función `animaCaminata` que
+* tome como entrada un arreglo -que supondremos que simula una caminata aleatoria en una dimensión- y
+* devuelva como salida una *animación* de la caminata. (Sugerencia: Usa tu función `graficaCaminata`.)"
+
+# ╔═╡ 5ab0a32a-4aff-4bb3-906a-45f718c45f66
+function animCaminata1D(pasito)
+anim = @animate for i = 1:pasito #Anima de 1 hasta pasito
+x1d = collect(1:1:pasito)   #Arreglo del eje x
+y1d=caminataAleatoria(10)#Arreglo dej eje y
+    plot(x1d[1:i], y1d[1:i],title = "Caminata aleatoria", xlabel = "Número de pasos", ylabel = "Posición", color = "lightpink2", label =false)
+end #Grafica x1d,y1d desde 1 hasta pasito
+ 
+gif(anim, "animCaminata1D.gif", fps = 1)
 end
 
-# ╔═╡ 217a6ab4-9733-414e-80e3-501370244f15
-begin
-	a=("Con", n, "puntos totales, la estimación de π es", 4*sumin/n, "Hay", sumin, "puntos rojos", sumout, "puntos azules")
+# ╔═╡ 1a7cf7b5-0bf0-4368-b4f2-c4d6417998b6
+animCaminata1D(10)
+
+# ╔═╡ 24490a53-4b2b-49bd-bf9d-f8994ed6a3a7
+md"""### Caminante aleatorio en dos dimensiones
+
+Generalicemos nuestro modelo de caminante aleatorio suponiendo que ahora nuestra partícula se mueve en un espacio _continuo_ de _dos_ dimensiones espaciales; con tamaño de paso _continuo_ y _variable_. Es decir que, a pesar de que seguiremos modelando con un tiempo discreto e intervalos de tiempo uniformes, ahora el espacio será _continuo_ y tendrá _dos_ dimensiones espaciales.
+"""
+
+# ╔═╡ 09361d57-7c4c-4832-afc4-edf6f8819368
+md""" **Ejercicio** Crea una función `caminataAleatoria2D` que
+* tome como entrada un número de pasos `n` y
+* devuelva como salida un arreglo con dos subarreglos que tengan `n+1` "posiciones" cada uno -uno de posiciones horizontales y otro de posiciones verticales, incluyendo las posiciones iniciales `0` en cada caso-, simulando una caminata aleatoria.
+Utiliza tu función `aleatorioUniforme` para generar números aleatorios en el intervalo $[-1,1]$ y suma números generados por esta función a las posiciones horizontales y verticales para simular un paso continuo en dos dimensiones."""
+
+# ╔═╡ 3ebdcc13-fa67-4a8c-b3c4-1c8593e25ac5
+function caminataAleatoria2D(R)                            #Definimos la función caminataAleatoria con f la cantidad de pasos
+	caminata2D=[caminataAleatoria(R) caminataAleatoria(R)] #Usando la función caminataAleatoria, se forma una matriz de Rx2 (R cantidad de pasos)
 end
 
-# ╔═╡ eef92aa6-b93e-4d8e-a6ec-64dac396d3e5
-md"##### En promedio, ¿cuántos puntos necesitas generar para obtener una precisión de ±0.01?"
+# ╔═╡ 87e676d0-b85e-472e-b918-a5a209182b9f
+caminataAleatoria2D(4)  
 
-# ╔═╡ 38264bd4-cf58-4f8b-b66b-c1da7e2dd1c2
-md"Esto es una pregunta difícil de contestar, esto debido a la naturalidad azarosa de la construcción de las coordenadas, con mucha suerte incluso se podría obtener una estimación de 3.12 con 100 puntos, con 10,000 puntos 13/20 tuvo esa precisión, incluso podría decir que (con muy pequeña probabilidad) todos los puntos caigan fuera del círculo y la estimación termine siendo 0."
+# ╔═╡ 893d49c4-ab84-4c57-a9e3-54116575ade3
+md"""**Ejercicio** Crea una función `graficaCaminata2D` que
 
-# ╔═╡ 50cb4faf-ba0f-4a30-9a77-08f3ddcc6bf2
-begin  
-function aproxpi(n)      #Función aproxpi dependiente de n, n es la cantidad de puntos
-	X=rand(Uniform(-1/2, 1/2), 1, n)#Arreglo de una columna con 2 filas, entradas de 
-                                    # -1/2 a 1/2
-	Y=rand(Uniform(-1/2, 1/2), 1, n) 
-	p = 4*count(X.^2 .+ Y.^2 .< 1/4)/n 
-	#P es la aproximación, cuenta si los puntos están dentro del círculo, divide entre el total de puntos y multiplica por 4
-end
-end
+* tome como entrada un arreglo con dos subarreglos -que, supondremos, simulan una caminata aleatoria en dos dimensiones- y 
+* devuelva como salida una gráfica bidimensional que muestre la trayectoria de la caminata.
 
-# ╔═╡ d8101d3d-a5de-4bef-a86e-4b9b1c2f3cdc
-aproxpi(10000)
+(Sugerencia: Crea un bloque de código con `begin` y `end` para poder hacer todo en una sola celda de Pluto.)
 
-# ╔═╡ cdba54ce-b884-4fb7-b72f-8be4fb1b69e8
-md"##### Realiza una gráfica del error de la estimación en función del número de puntos comparando contra el valor predeterminado de π de Julia"
+Luego, en una celda aparte, define una variable `x` como un número entero positivo y aplica tu función `graficaCaminata2D` a `caminataAleatoria2D(x)` para generar gráficas de caminatas aleatorias en dos dimensiones.
+"""
 
-# ╔═╡ 4f8a3714-ae3d-4e37-8283-5c1d86fcc2dd
-begin
-	A=[1,5,10,50,100,500,1000,5000,10000,50000,100000,500000,1000000] #Arreglo para observar los diferentes valores de la aproximación
-	B=aproxpi.(A) #Aplicacamos la funcion aproxpi al vector A
-	C=A./A.*pi   #No se nos ocurrió manera más elegante para graficar pi ):
-	D=abs.(pi.-B)
+# ╔═╡ d292165a-b37b-47a6-a61e-dbdafbf1f928
+function graficaCaminata2D(Q) #Otra manera de hacerlo c;
+	X=caminataAleatoria(Q)     #Posición en x
+	Y=caminataAleatoria(Q)     #Posición en y
+	return plot(X,Y,title = "Caminata aleatoria 2D", xlabel = "Posición x", ylabel = "Posición y", color = "lightpink2", label =false, aspect_ratio=:equal)       #Devuelve la gráfica de X,Y
 end
 
-# ╔═╡ 36aa27d6-3af9-4411-be83-031a3d212f36
-A
+# ╔═╡ 8c4fa5fb-f2bc-471c-a66e-ff3f17f7d14b
+graficaCaminata2D(1000)
 
-# ╔═╡ 9fb92e64-9c9d-40d4-89b4-d5863d70dcca
-begin
-	scatter(A,B, xaxis=:log, xlabel = "Cantidad de puntos", ylabel = "Aproximación de π", color=:"lightcoral", markerstrokewidth=0, title="Estimación de π (método de Montecarlo)", label="Estimación de π") #Grafica la aproxpi de A, con escala logarítmica
-	plot!(A,C, linecolor = :"palevioletred", label="Valor de π") #Valor real de Pi
+# ╔═╡ eb7afba3-6d48-4406-8ac7-75521a965a14
+md"**Ejercicio** Crea una función `graficaCaminata2D!` que sea una versión modificadora de la función anterior y genera una gráfica con 5 caminatas aleatorias.
+"
+
+# ╔═╡ ff3c8595-0466-412e-b20b-30336916f573
+function graficaCaminata2D!(S,T) #S son la cantidad de caminatas aleatorias y T los pasos
+	plot()             #Grafica
+	for i in 1:S       #Para i de 1 hasta H
+		plot!(caminataAleatoria(T),caminataAleatoria(T),title = "Caminata aleatoria 2D", xlabel = "Posición en Y", ylabel = "Posición en X", label =false, lef=false, aspect_ratio=:equal) #Grafica en X una caminata y en Y otra
+	end
+	plot!()            #Muestra la gráfica
 end
 
-# ╔═╡ 87d1758b-c481-46cb-b645-8c90925cef12
-plot(A,D, xaxis=:log, xlabel = "Cantidad de puntos", ylabel = "Error (π-estimación)", color=:"lightcoral", label=false, title="Error de la estimación") #Grafica del valor absoluto de la resta de pi menor la estimación con el método de montecarlo.
+# ╔═╡ f7aa003b-0c6b-4527-9d9b-cd69979f9770
+graficaCaminata2D!(5,1000)
+
+# ╔═╡ ec2b4750-3522-4c26-87ff-06b0b2e3b5d6
+md"**Ejercicio** Crea una función `animaCaminata2D` que
+* tome como entrada un arreglo con dos subarreglos -que, supondremos, simulan una caminata aleatoria en dos dimensiones- y 
+* devuelva como salida una *animación* de la caminata. (Sugerencia: Usa tu función `graficaCaminata2D`.)"
+
+# ╔═╡ f08b6ef6-65c1-4b53-ba50-128e589f70ee
+function animaCaminata2D(pasos) #Funcion animacaminata2D
+anim = @animate for i = 1:pasos #Desde 1 hasta el último paso
+x2d=caminataAleatoria(pasos)    #comienza con la gráfica de x1d
+y2d=caminataAleatoria(pasos)    #comienza con la gráfica de y1d
+    plot(x2d[1:i], y2d[1:i],title = "Caminata aleatoria 2D", xlabel = "Posición x", ylabel = "Posición y", color = "lightpink2", label =false)
+end
+ 
+gif(anim, "animaCaminata2D.gif", fps = 1)
+end
+
+# ╔═╡ dfec62ea-f2e9-42f1-a450-508375f27013
+animaCaminata2D(10)
+
+# ╔═╡ ef1706ee-85dc-422b-98fa-aa43f75ae098
+md"**Ejercicio** ¡Haz una caminata aleatoria en tres dimensiones espaciales y grafícala! (Así se modelan, por ejemplo, las partículas en un gas)." 
+
+# ╔═╡ 48e666c6-3a29-4ebb-993f-06696a49b025
+function graficaCaminata3D(U) #Función caminata 3D
+	p=caminataAleatoria(U)     #Posición en x
+	q=caminataAleatoria(U)     #Posición en y
+	r=caminataAleatoria(U)     #Posición en z
+	return plot(p,q,r,title = "Caminata aleatoria 3D", xlabel = "Posición x", ylabel = "Posición y", zlabel = "Posición z", color = "mediumseagreen
+", label =false, aspect_ratio=:equal)       #Devuelve la gráfica de p,q,r
+end
+
+# ╔═╡ 2662d8a2-766b-4085-928a-b5e00db76dc2
+graficaCaminata3D(100)
+
+# ╔═╡ 4204c851-7e83-45af-9e09-e08708674c6b
+function graficaCaminata3D!(v,w) #v son la cantidad de caminatas aleatorias y w los pasos
+	plot()             #Grafica
+	for i in 1:v       #Para i de 1 hasta H
+		plot!(caminataAleatoria(w),caminataAleatoria(w),caminataAleatoria(w),title = "Caminata aleatoria 3D", xlabel = "Posición en Y", ylabel = "Posición en X", zlabel = "Posición z", label =false, lef=false, aspect_ratio=:equal) #Grafica en X una caminata, Y otra, Z 
+	end
+	plot!()            #Muestra la gráfica
+end
+
+# ╔═╡ eb90ee0a-ad07-48e1-b2f8-69e3e48e2784
+graficaCaminata3D!(5,100)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
-PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 
 [compat]
-Distributions = "~0.25.57"
-Plots = "~1.28.2"
-PlutoUI = "~0.7.38"
+Distributions = "~0.25.59"
+Plots = "~1.29.0"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -121,12 +310,6 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.7.2"
 manifest_format = "2.0"
-
-[[deps.AbstractPlutoDingetjes]]
-deps = ["Pkg"]
-git-tree-sha1 = "8eaf9f1b4921132a4cff3f36a1d9ba923b14a481"
-uuid = "6e696c72-6542-2067-7265-42206c756150"
-version = "1.1.4"
 
 [[deps.Adapt]]
 deps = ["LinearAlgebra"]
@@ -163,27 +346,33 @@ version = "0.5.1"
 
 [[deps.ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra", "SparseArrays"]
-git-tree-sha1 = "9950387274246d08af38f6eef8cb5480862a435f"
+git-tree-sha1 = "9489214b993cd42d17f44c36e359bf6a7c919abf"
 uuid = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
-version = "1.14.0"
+version = "1.15.0"
 
 [[deps.ChangesOfVariables]]
 deps = ["ChainRulesCore", "LinearAlgebra", "Test"]
-git-tree-sha1 = "bf98fa45a0a4cee295de98d4c1462be26345b9a1"
+git-tree-sha1 = "1e315e3f4b0b7ce40feded39c73049692126cf53"
 uuid = "9e997f8a-9a97-42d5-a9f1-ce6bfc15e2c0"
-version = "0.1.2"
+version = "0.1.3"
 
 [[deps.ColorSchemes]]
-deps = ["ColorTypes", "Colors", "FixedPointNumbers", "Random"]
-git-tree-sha1 = "12fc73e5e0af68ad3137b886e3f7c1eacfca2640"
+deps = ["ColorTypes", "ColorVectorSpace", "Colors", "FixedPointNumbers", "Random"]
+git-tree-sha1 = "7297381ccb5df764549818d9a7d57e45f1057d30"
 uuid = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
-version = "3.17.1"
+version = "3.18.0"
 
 [[deps.ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
-git-tree-sha1 = "024fe24d83e4a5bf5fc80501a314ce0d1aa35597"
+git-tree-sha1 = "0f4e115f6f34bbe43c19751c90a38b2f380637b9"
 uuid = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
-version = "0.11.0"
+version = "0.11.3"
+
+[[deps.ColorVectorSpace]]
+deps = ["ColorTypes", "FixedPointNumbers", "LinearAlgebra", "SpecialFunctions", "Statistics", "TensorCore"]
+git-tree-sha1 = "d08c20eef1f2cbc6e60fd3612ac4340b89fea322"
+uuid = "c3611d14-8923-5661-9e6a-0046d554d3a4"
+version = "0.9.9"
 
 [[deps.Colors]]
 deps = ["ColorTypes", "FixedPointNumbers", "Reexport"]
@@ -192,10 +381,10 @@ uuid = "5ae59095-9a9b-59fe-a467-6f913c188581"
 version = "0.12.8"
 
 [[deps.Compat]]
-deps = ["Base64", "Dates", "DelimitedFiles", "Distributed", "InteractiveUtils", "LibGit2", "Libdl", "LinearAlgebra", "Markdown", "Mmap", "Pkg", "Printf", "REPL", "Random", "SHA", "Serialization", "SharedArrays", "Sockets", "SparseArrays", "Statistics", "Test", "UUIDs", "Unicode"]
-git-tree-sha1 = "b153278a25dd42c65abbf4e62344f9d22e59191b"
+deps = ["Dates", "LinearAlgebra", "UUIDs"]
+git-tree-sha1 = "924cdca592bc16f14d2f7006754a621735280b74"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
-version = "3.43.0"
+version = "4.1.0"
 
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -214,9 +403,9 @@ version = "1.10.0"
 
 [[deps.DataStructures]]
 deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
-git-tree-sha1 = "3daef5523dd2e769dad2365274f760ff5f282c7d"
+git-tree-sha1 = "d1fff3a548102f48987a52a2e0d114fa97d730f0"
 uuid = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
-version = "0.18.11"
+version = "0.18.13"
 
 [[deps.DataValueInterfaces]]
 git-tree-sha1 = "bfc1187b79289637fa0ef6d4436ebdfe6905cbd6"
@@ -237,15 +426,11 @@ git-tree-sha1 = "80c3e8639e3353e5d2912fb3a1916b8455e2494b"
 uuid = "b429d917-457f-4dbc-8f4c-0cc954292b1d"
 version = "0.4.0"
 
-[[deps.Distributed]]
-deps = ["Random", "Serialization", "Sockets"]
-uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
-
 [[deps.Distributions]]
 deps = ["ChainRulesCore", "DensityInterface", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SparseArrays", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns", "Test"]
-git-tree-sha1 = "f206814c860c2a909d2a467af0484d08edd05ee7"
+git-tree-sha1 = "d29d8faf1a0ca59167f04edd4d0eb971a6ae009c"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.57"
+version = "0.25.59"
 
 [[deps.DocStringExtensions]]
 deps = ["LibGit2"]
@@ -331,15 +516,15 @@ version = "3.3.6+0"
 
 [[deps.GR]]
 deps = ["Base64", "DelimitedFiles", "GR_jll", "HTTP", "JSON", "Libdl", "LinearAlgebra", "Pkg", "Printf", "Random", "RelocatableFolders", "Serialization", "Sockets", "Test", "UUIDs"]
-git-tree-sha1 = "af237c08bda486b74318c8070adb96efa6952530"
+git-tree-sha1 = "b316fd18f5bc025fedcb708332aecb3e13b9b453"
 uuid = "28b8d3ca-fb5f-59d9-8090-bfdbd6d07a71"
-version = "0.64.2"
+version = "0.64.3"
 
 [[deps.GR_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Cairo_jll", "FFMPEG_jll", "Fontconfig_jll", "GLFW_jll", "JLLWrappers", "JpegTurbo_jll", "Libdl", "Libtiff_jll", "Pixman_jll", "Pkg", "Qt5Base_jll", "Zlib_jll", "libpng_jll"]
-git-tree-sha1 = "cd6efcf9dc746b06709df14e462f0a3fe0786b1e"
+git-tree-sha1 = "1e5490a51b4e9d07e8b04836f6008f46b48aaa87"
 uuid = "d2c73de3-f751-5644-a686-071e5b155ba9"
-version = "0.64.2+0"
+version = "0.64.3+0"
 
 [[deps.GeometryBasics]]
 deps = ["EarCut_jll", "IterTools", "LinearAlgebra", "StaticArrays", "StructArrays", "Tables"]
@@ -384,26 +569,9 @@ version = "2.8.1+1"
 
 [[deps.HypergeometricFunctions]]
 deps = ["DualNumbers", "LinearAlgebra", "SpecialFunctions", "Test"]
-git-tree-sha1 = "65e4589030ef3c44d3b90bdc5aac462b4bb05567"
+git-tree-sha1 = "cb7099a0109939f16a4d3b572ba8396b1f6c7c31"
 uuid = "34004b35-14d8-5ef3-9330-4cdb6864b03a"
-version = "0.3.8"
-
-[[deps.Hyperscript]]
-deps = ["Test"]
-git-tree-sha1 = "8d511d5b81240fc8e6802386302675bdf47737b9"
-uuid = "47d2ed2b-36de-50cf-bf87-49c2cf4b8b91"
-version = "0.0.4"
-
-[[deps.HypertextLiteral]]
-git-tree-sha1 = "2b078b5a615c6c0396c77810d92ee8c6f470d238"
-uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
-version = "0.9.3"
-
-[[deps.IOCapture]]
-deps = ["Logging", "Random"]
-git-tree-sha1 = "f7be53659ab06ddc986428d3a9dcc95f6fa6705a"
-uuid = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
-version = "0.2.2"
+version = "0.3.10"
 
 [[deps.IniFile]]
 git-tree-sha1 = "f550e6e32074c939295eb5ea6de31849ac2c9625"
@@ -416,9 +584,9 @@ uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 
 [[deps.InverseFunctions]]
 deps = ["Test"]
-git-tree-sha1 = "91b5dcf362c5add98049e6c29ee756910b03051d"
+git-tree-sha1 = "336cc738f03e069ef2cac55a104eb823455dca75"
 uuid = "3587e190-3f89-42d0-90ee-14403ec27112"
-version = "0.1.3"
+version = "0.1.4"
 
 [[deps.IrrationalConstants]]
 git-tree-sha1 = "7fd44fd4ff43fc60815f8e764c0f352b83c49151"
@@ -539,9 +707,9 @@ version = "2.35.0+0"
 
 [[deps.Libtiff_jll]]
 deps = ["Artifacts", "JLLWrappers", "JpegTurbo_jll", "LERC_jll", "Libdl", "Pkg", "Zlib_jll", "Zstd_jll"]
-git-tree-sha1 = "c9551dd26e31ab17b86cbd00c2ede019c08758eb"
+git-tree-sha1 = "3eb79b0ca5764d4799c06699573fd8f533259713"
 uuid = "89763e89-9b03-5906-acba-b20f662cd828"
-version = "4.3.0+1"
+version = "4.4.0+0"
 
 [[deps.Libuuid_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -555,9 +723,9 @@ uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
 [[deps.LogExpFunctions]]
 deps = ["ChainRulesCore", "ChangesOfVariables", "DocStringExtensions", "InverseFunctions", "IrrationalConstants", "LinearAlgebra"]
-git-tree-sha1 = "76c987446e8d555677f064aaac1145c4c17662f8"
+git-tree-sha1 = "09e4b894ce6a976c354a69041a04748180d43637"
 uuid = "2ab3a3ac-af41-5b50-aa03-7779005ae688"
-version = "0.3.14"
+version = "0.3.15"
 
 [[deps.Logging]]
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
@@ -652,9 +820,9 @@ version = "8.44.0+0"
 
 [[deps.PDMats]]
 deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse"]
-git-tree-sha1 = "3114946c67ef9925204cc024a73c9e679cebe0d7"
+git-tree-sha1 = "027185efff6be268abbaf30cfd53ca9b59e3c857"
 uuid = "90014a1f-27ba-587c-ab20-58faa44d9150"
-version = "0.11.8"
+version = "0.11.10"
 
 [[deps.Parsers]]
 deps = ["Dates"]
@@ -686,15 +854,9 @@ version = "1.2.0"
 
 [[deps.Plots]]
 deps = ["Base64", "Contour", "Dates", "Downloads", "FFMPEG", "FixedPointNumbers", "GR", "GeometryBasics", "JSON", "Latexify", "LinearAlgebra", "Measures", "NaNMath", "Pkg", "PlotThemes", "PlotUtils", "Printf", "REPL", "Random", "RecipesBase", "RecipesPipeline", "Reexport", "Requires", "Scratch", "Showoff", "SparseArrays", "Statistics", "StatsBase", "UUIDs", "UnicodeFun", "Unzip"]
-git-tree-sha1 = "9101f17d98edd72a44db95afcaf3534d500da058"
+git-tree-sha1 = "d457f881ea56bbfa18222642de51e0abf67b9027"
 uuid = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
-version = "1.28.2"
-
-[[deps.PlutoUI]]
-deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "Markdown", "Random", "Reexport", "UUIDs"]
-git-tree-sha1 = "670e559e5c8e191ded66fa9ea89c97f10376bb4c"
-uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
-version = "0.7.38"
+version = "1.29.0"
 
 [[deps.Preferences]]
 deps = ["TOML"]
@@ -778,10 +940,6 @@ version = "1.1.0"
 [[deps.Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 
-[[deps.SharedArrays]]
-deps = ["Distributed", "Mmap", "Random", "Serialization"]
-uuid = "1a1011a3-84de-559e-8e89-a11a2f7dc383"
-
 [[deps.Showoff]]
 deps = ["Dates", "Grisu"]
 git-tree-sha1 = "91eddf657aca81df9ae6ceb20b959ae5653ad1de"
@@ -803,15 +961,15 @@ uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [[deps.SpecialFunctions]]
 deps = ["ChainRulesCore", "IrrationalConstants", "LogExpFunctions", "OpenLibm_jll", "OpenSpecFun_jll"]
-git-tree-sha1 = "5ba658aeecaaf96923dce0da9e703bd1fe7666f9"
+git-tree-sha1 = "bc40f042cfcc56230f781d92db71f0e21496dffd"
 uuid = "276daf66-3868-5448-9aa4-cd146d93841b"
-version = "2.1.4"
+version = "2.1.5"
 
 [[deps.StaticArrays]]
 deps = ["LinearAlgebra", "Random", "Statistics"]
-git-tree-sha1 = "cd56bf18ed715e8b09f06ef8c6b781e6cdc49911"
+git-tree-sha1 = "383a578bdf6e6721f480e749d503ebc8405a0b22"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "1.4.4"
+version = "1.4.6"
 
 [[deps.Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]
@@ -831,15 +989,15 @@ version = "0.33.16"
 
 [[deps.StatsFuns]]
 deps = ["ChainRulesCore", "HypergeometricFunctions", "InverseFunctions", "IrrationalConstants", "LogExpFunctions", "Reexport", "Rmath", "SpecialFunctions"]
-git-tree-sha1 = "ca9f8a0c9f2e41431dc5b7697058a3f8f8b89498"
+git-tree-sha1 = "5783b877201a82fc0014cbf381e7e6eb130473a4"
 uuid = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
-version = "1.0.0"
+version = "1.0.1"
 
 [[deps.StructArrays]]
 deps = ["Adapt", "DataAPI", "StaticArrays", "Tables"]
-git-tree-sha1 = "8f705dd141733d79aa2932143af6c6e0b6cea8df"
+git-tree-sha1 = "9abba8f8fb8458e9adf07c8a2377a070674a24f1"
 uuid = "09ab397b-f2b6-538f-b94a-2f83cf4a842a"
-version = "0.6.6"
+version = "0.6.8"
 
 [[deps.SuiteSparse]]
 deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
@@ -864,6 +1022,12 @@ version = "1.7.0"
 [[deps.Tar]]
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
+
+[[deps.TensorCore]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "1feb45f88d133a655e001435632f019a9a1bcdb6"
+uuid = "62fd8b95-f654-4bbd-a8a5-9c27f68ccd50"
+version = "0.1.1"
 
 [[deps.Test]]
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
@@ -906,9 +1070,9 @@ version = "1.25.0+0"
 
 [[deps.XML2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libiconv_jll", "Pkg", "Zlib_jll"]
-git-tree-sha1 = "1acf5bdf07aa0907e0a37d3718bb88d4b687b74a"
+git-tree-sha1 = "58443b63fb7e465a8a7210828c91c08b92132dff"
 uuid = "02c8fc9c-b97f-50b9-bbe4-9be30ff0a78a"
-version = "2.9.12+0"
+version = "2.9.14+0"
 
 [[deps.XSLT_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libgcrypt_jll", "Libgpg_error_jll", "Libiconv_jll", "Pkg", "XML2_jll", "Zlib_jll"]
@@ -1108,22 +1272,58 @@ version = "0.9.1+5"
 """
 
 # ╔═╡ Cell order:
-# ╠═ab3ddc10-ccce-11ec-2bac-0975bbb93a6d
-# ╟─0e91569d-c5c7-4b32-af84-1d9a1d865768
-# ╟─d28a7306-0b84-4436-9dde-e23fc7927cbe
-# ╠═adfee34c-3403-4192-975f-3355787da9e2
-# ╠═7c8861a9-5d7c-45c4-8251-6e418289ffe0
-# ╟─cab4aa80-7457-422a-9d97-b24a4b06f7cb
-# ╟─cd344344-61e2-46e1-9153-773e338da51c
-# ╟─217a6ab4-9733-414e-80e3-501370244f15
-# ╟─eef92aa6-b93e-4d8e-a6ec-64dac396d3e5
-# ╟─38264bd4-cf58-4f8b-b66b-c1da7e2dd1c2
-# ╠═d8101d3d-a5de-4bef-a86e-4b9b1c2f3cdc
-# ╠═50cb4faf-ba0f-4a30-9a77-08f3ddcc6bf2
-# ╟─cdba54ce-b884-4fb7-b72f-8be4fb1b69e8
-# ╠═4f8a3714-ae3d-4e37-8283-5c1d86fcc2dd
-# ╠═36aa27d6-3af9-4411-be83-031a3d212f36
-# ╠═9fb92e64-9c9d-40d4-89b4-d5863d70dcca
-# ╠═87d1758b-c481-46cb-b645-8c90925cef12
+# ╟─f4a77582-9121-4881-8139-fcb01d4ef6b9
+# ╟─6f5f31aa-2941-42f5-aceb-bedb2bd30ea2
+# ╟─62816dec-c81a-40cb-aebd-8bda77d5e389
+# ╟─6dd575bd-5ee7-49ab-8234-ab83eff83ebf
+# ╠═21f8ead8-8ff7-417c-8d8c-65846fb2ee06
+# ╠═08d1377d-2f7e-48ac-b4b3-bb8cf0707753
+# ╠═779b02e9-661e-462b-ab36-caddf0cf5044
+# ╟─d3e89523-095f-4f2f-aa2c-b38887c187eb
+# ╠═88b91aab-5fa3-4d55-a06c-f0906b162152
+# ╠═712bfc18-334c-470f-8809-1a1388be7b66
+# ╠═e9b135bb-5053-4137-8b1d-701d7d6ec7b4
+# ╠═23378cfc-d0c5-46fd-ac00-e59fd0909301
+# ╠═f3f8bf11-6358-4f39-9749-0189161df5f6
+# ╟─97ec59e8-2d0d-43d3-b2c8-dd74c7020352
+# ╠═87df961f-656f-4a42-b5c2-fef7d5201a01
+# ╠═d4caf15c-4f99-44e4-9222-519433799348
+# ╟─737eb77d-ce3f-4eac-9f38-5cbae8bd2636
+# ╠═75298007-9b20-4ca7-a94a-b94c0785073c
+# ╟─5eedcedb-7dd6-45b0-8a06-238bf6b358f7
+# ╠═fc77bf6a-1864-431a-bd9b-0e3a471d81b7
+# ╠═a07c0713-ca1b-49a6-870b-426979a36d16
+# ╟─d3a7fcb3-b0a5-4b41-bf95-ac3ffdce7fb6
+# ╠═544fdf8f-fb78-40be-8618-f071c47f00b2
+# ╠═2178c065-7114-4edd-8742-4b8d2561f4fa
+# ╟─f2bb54fd-ccb9-4e8d-b8c4-3a4058ffbe4c
+# ╠═e068927b-38b9-40e7-b3f6-5f11da246cbd
+# ╟─1e68a5ca-d78e-4371-a63c-d329d11b187f
+# ╠═c0f7aa17-1013-4fdf-988e-20e8eb492643
+# ╠═7138f836-8f3f-4f18-9e8c-132671422d55
+# ╟─07edca52-f4bc-478f-b823-9811c320e171
+# ╠═896d6213-105b-403f-8aed-632303c7ba2b
+# ╠═ce2a6e2c-6faf-4a62-bd7f-44e10fd4ad1e
+# ╟─75d3a337-a3b2-4319-bd1b-72d2642caef7
+# ╠═5ab0a32a-4aff-4bb3-906a-45f718c45f66
+# ╠═1a7cf7b5-0bf0-4368-b4f2-c4d6417998b6
+# ╟─24490a53-4b2b-49bd-bf9d-f8994ed6a3a7
+# ╟─09361d57-7c4c-4832-afc4-edf6f8819368
+# ╠═3ebdcc13-fa67-4a8c-b3c4-1c8593e25ac5
+# ╠═87e676d0-b85e-472e-b918-a5a209182b9f
+# ╟─893d49c4-ab84-4c57-a9e3-54116575ade3
+# ╠═d292165a-b37b-47a6-a61e-dbdafbf1f928
+# ╠═8c4fa5fb-f2bc-471c-a66e-ff3f17f7d14b
+# ╟─eb7afba3-6d48-4406-8ac7-75521a965a14
+# ╠═ff3c8595-0466-412e-b20b-30336916f573
+# ╠═f7aa003b-0c6b-4527-9d9b-cd69979f9770
+# ╟─ec2b4750-3522-4c26-87ff-06b0b2e3b5d6
+# ╠═f08b6ef6-65c1-4b53-ba50-128e589f70ee
+# ╠═dfec62ea-f2e9-42f1-a450-508375f27013
+# ╟─ef1706ee-85dc-422b-98fa-aa43f75ae098
+# ╠═48e666c6-3a29-4ebb-993f-06696a49b025
+# ╠═2662d8a2-766b-4085-928a-b5e00db76dc2
+# ╠═4204c851-7e83-45af-9e09-e08708674c6b
+# ╠═eb90ee0a-ad07-48e1-b2f8-69e3e48e2784
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
