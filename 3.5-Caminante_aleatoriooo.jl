@@ -169,7 +169,7 @@ function graficaCaminata!(H,I) #H son la cantidad de caminatas aleatorias e I lo
 end
 
 # ╔═╡ ce2a6e2c-6faf-4a62-bd7f-44e10fd4ad1e
-graficaCaminata!(5,50)
+graficaCaminata!(5,100)
 
 # ╔═╡ 75d3a337-a3b2-4319-bd1b-72d2642caef7
 md"**Ejercicio** Crea una función `animaCaminata` que
@@ -245,7 +245,7 @@ function graficaCaminata2D!(S,T) #S son la cantidad de caminatas aleatorias y T 
 end
 
 # ╔═╡ f7aa003b-0c6b-4527-9d9b-cd69979f9770
-graficaCaminata2D!(5,1000)
+graficaCaminata2D!(5,100)
 
 # ╔═╡ ec2b4750-3522-4c26-87ff-06b0b2e3b5d6
 md"**Ejercicio** Crea una función `animaCaminata2D` que
@@ -279,7 +279,7 @@ function graficaCaminata3D(U) #Función caminata 3D
 end
 
 # ╔═╡ 2662d8a2-766b-4085-928a-b5e00db76dc2
-graficaCaminata3D(100)
+graficaCaminata3D(5000)
 
 # ╔═╡ 4204c851-7e83-45af-9e09-e08708674c6b
 function graficaCaminata3D!(v,w) #v son la cantidad de caminatas aleatorias y w los pasos
